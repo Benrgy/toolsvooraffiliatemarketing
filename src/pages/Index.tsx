@@ -1,13 +1,29 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Layout } from "@/components/Layout";
+import { Hero } from "@/components/home/Hero";
+import { Helmet } from "react-helmet-async";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <Layout>
+      <Helmet>
+        <title>Beginnen Met Affiliate Marketing - AI Automatisering voor Succes</title>
+        <meta
+          name="description"
+          content="Automatiseer je affiliate marketing met AI. Verhoog je inkomsten met slimme tools en strategieën. Start vandaag nog!"
+        />
+        <meta property="og:title" content="Beginnen Met Affiliate Marketing - AI Automatisering" />
+        <meta
+          property="og:description"
+          content="Automatiseer je affiliate marketing met AI. Verhoog je inkomsten met slimme tools en strategieën."
+        />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://beginnenmetaffiliate.nl/" />
+      </Helmet>
+      
+      <Hero />
+      
+      {/* More sections will be added */}
+    </Layout>
   );
 };
 
