@@ -77,6 +77,36 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author_id: string | null
@@ -174,6 +204,129 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tool_features: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          tool_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature: string
+          id?: string
+          tool_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_features_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tool_tags: {
+        Row: {
+          created_at: string
+          id: string
+          tag: string
+          tool_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tag: string
+          tool_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tag?: string
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_tags_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tools: {
+        Row: {
+          affiliate_link: string | null
+          category_id: string | null
+          created_at: string
+          description: string
+          featured: boolean | null
+          id: string
+          logo_url: string | null
+          name: string
+          pricing_model: string | null
+          published_at: string | null
+          slug: string
+          status: string | null
+          tagline: string
+          updated_at: string
+          upvotes: number | null
+          website_url: string
+        }
+        Insert: {
+          affiliate_link?: string | null
+          category_id?: string | null
+          created_at?: string
+          description: string
+          featured?: boolean | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          pricing_model?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string | null
+          tagline: string
+          updated_at?: string
+          upvotes?: number | null
+          website_url: string
+        }
+        Update: {
+          affiliate_link?: string | null
+          category_id?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          pricing_model?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string | null
+          tagline?: string
+          updated_at?: string
+          upvotes?: number | null
+          website_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tools_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
