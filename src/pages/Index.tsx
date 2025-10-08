@@ -1,5 +1,8 @@
 import { Layout } from "@/components/Layout";
 import { Hero } from "@/components/home/Hero";
+import { Features } from "@/components/home/Features";
+import { Pricing } from "@/components/home/Pricing";
+import { Contact } from "@/components/home/Contact";
 import { Helmet } from "react-helmet-async";
 
 const Index = () => {
@@ -21,8 +24,9 @@ const Index = () => {
       </Helmet>
       
       <Hero />
-      
-      {/* More sections will be added */}
+      <Features />
+      <Pricing />
+      <Contact />
     </Layout>
   );
 };
