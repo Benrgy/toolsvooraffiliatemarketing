@@ -31,13 +31,13 @@ export const Contact = () => {
       <div className="container mx-auto px-4">
         <div className="text-center space-y-4 mb-16 animate-fade-in">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Neem{" "}
+            Mis een{" "}
             <span className="gradient-primary bg-clip-text text-transparent">
-              Contact Op
+              Tool?
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Benieuwd hoe wij jouw affiliate marketing kunnen automatiseren? Laat je gegevens achter en we nemen contact met je op.
+            Ken jij een geweldige AI tool die hier nog niet staat? Laat het ons weten!
           </p>
         </div>
 

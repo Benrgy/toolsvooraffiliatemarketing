@@ -4,33 +4,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const features = [
   {
     icon: Bot,
-    title: "AI-Gedreven Automatisering",
-    description: "Automatiseer repetitieve taken en laat AI je affiliate marketing optimaliseren voor maximale conversies.",
+    title: "Content Generatie",
+    description: "Vind tools die automatisch SEO-geoptimaliseerde content creëren voor je affiliate websites en blogs.",
   },
   {
     icon: Zap,
-    title: "Snelle Implementatie",
-    description: "Binnen enkele dagen operationeel met onze plug-and-play oplossingen voor affiliate marketing.",
+    title: "Conversie Optimalisatie",
+    description: "Ontdek AI tools die je landingspages analyseren en optimaliseren voor hogere conversies.",
   },
   {
     icon: TrendingUp,
-    title: "Verhoog Je Inkomsten",
-    description: "Bewezen strategieën en tools die je affiliate inkomsten verhogen met gemiddeld 40-60%.",
+    title: "Analytics & Tracking",
+    description: "Tools die je data analyseren en voorspellen welke producten het beste presteren.",
   },
   {
     icon: Shield,
-    title: "Veilig & Betrouwbaar",
-    description: "Enterprise-grade beveiliging en 99.9% uptime voor je affiliate marketing operaties.",
+    title: "Email Marketing",
+    description: "Automatiseer je email campagnes met slimme AI tools die personaliseren op individueel niveau.",
   },
   {
     icon: Clock,
-    title: "24/7 Beschikbaar",
-    description: "Je automatisering werkt dag en nacht door, zodat je inkomsten blijven groeien terwijl jij slaapt.",
+    title: "Social Media Automatisering",
+    description: "Plan en optimaliseer je social media posts met AI voor maximale engagement.",
   },
   {
     icon: Sparkles,
-    title: "Nederlandse Support",
-    description: "Direct contact met Nederlandse experts die je helpen het maximale uit je automatisering te halen.",
+    title: "SEO Tools",
+    description: "Vind de beste AI SEO tools om hoger te ranken in Google en meer organisch verkeer te krijgen.",
   },
 ];
 
@@ -40,13 +40,13 @@ export const Features = () => {
       <div className="container mx-auto px-4">
         <div className="text-center space-y-4 mb-16 animate-fade-in">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">
-            Waarom Kiezen Voor{" "}
+            Welke Tools{" "}
             <span className="gradient-primary bg-clip-text text-transparent">
-              AI Automatisering
+              Vind Je Hier
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Ontdek hoe onze AI-gedreven tools je affiliate marketing naar een hoger niveau tillen
+            Van content creatie tot conversie optimalisatie - ontdek de tools die jou helpen
           </p>
         </div>
 

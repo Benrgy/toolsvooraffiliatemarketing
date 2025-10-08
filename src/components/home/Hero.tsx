@@ -15,20 +15,19 @@ export const Hero = () => {
         <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in-up">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
             <Sparkles className="h-4 w-4" />
-            <span>AI-gedreven Affiliate Marketing Automatisering</span>
+            <span>Handgeselecteerde AI Tools Directory</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-            Automatiseer Je{" "}
+            Ontdek de Beste{" "}
             <span className="gradient-primary bg-clip-text text-transparent">
-              Affiliate Marketing
+              AI Tools
             </span>
-            {" "}Met AI
+            {" "}voor Affiliate Marketing
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-            Verhoog je affiliate inkomsten met slimme automatisering. Wij helpen je processen 
-            optimaliseren en maximale resultaten behalen.
+            Vind handige AI automatiseringstools om je affiliate marketing naar een hoger niveau te tillen
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
@@ -37,8 +36,8 @@ export const Hero = () => {
               size="lg"
               className="gradient-primary shadow-primary text-lg h-14 px-8"
             >
-              <Link to="/#contact">
-                Start Vandaag
+              <Link to="/tools">
+                Ontdek Alle Tools
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -51,15 +50,15 @@ export const Hero = () => {
           <div className="pt-8 flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-success" />
-              <span>24/7 Automatisering</span>
+              <span>Dagelijks Nieuwe Tools</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-success" />
-              <span>AI-Powered Tools</span>
+              <span>Eerlijke Reviews</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-success" />
-              <span>Nederlandse Support</span>
+              <span>Gratis & Betaalde Opties</span>
             </div>
           </div>
         </div>

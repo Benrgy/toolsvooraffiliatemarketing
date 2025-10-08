@@ -48,14 +48,11 @@ export const Header = () => {
             <Link to="/" className="text-sm font-medium transition-smooth hover:text-primary">
               Home
             </Link>
+            <Link to="/tools" className="text-sm font-medium transition-smooth hover:text-primary">
+              Tools
+            </Link>
             <Link to="/blog" className="text-sm font-medium transition-smooth hover:text-primary">
               Blog
-            </Link>
-            <Link to="/#features" className="text-sm font-medium transition-smooth hover:text-primary">
-              Diensten
-            </Link>
-            <Link to="/#pricing" className="text-sm font-medium transition-smooth hover:text-primary">
-              Prijzen
             </Link>
             <Button asChild className="gradient-primary shadow-primary">
               <Link to="/#contact">Contact</Link>
@@ -84,25 +81,18 @@ export const Header = () => {
                 Home
               </Link>
               <Link
+                to="/tools"
+                className="text-sm font-medium transition-smooth hover:text-primary"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Tools
+              </Link>
+              <Link
                 to="/blog"
                 className="text-sm font-medium transition-smooth hover:text-primary"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Blog
-              </Link>
-              <Link
-                to="/#features"
-                className="text-sm font-medium transition-smooth hover:text-primary"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Diensten
-              </Link>
-              <Link
-                to="/#pricing"
-                className="text-sm font-medium transition-smooth hover:text-primary"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Prijzen
               </Link>
               <Button asChild className="gradient-primary shadow-primary w-full">
                 <Link to="/#contact" onClick={() => setIsMenuOpen(false)}>
