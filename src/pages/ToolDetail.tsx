@@ -1,12 +1,12 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
+import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ExternalLink, Check } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExternalLink, ArrowLeft, Star } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 const ToolDetail = () => {
@@ -20,12 +20,12 @@ const ToolDetail = () => {
         .select(`
           *,
           category:category_id(name, slug),
-          tool_tags(tag),
-          tool_features(feature)
+          tool_features(feature),
+          tool_tags(tag)
         `)
         .eq("slug", slug)
         .eq("status", "published")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -35,14 +35,18 @@ const ToolDetail = () => {
   if (isLoading) {
     return (
       <Layout>
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <Skeleton className="h-8 w-32 mb-8" />
-            <Skeleton className="h-12 w-3/4 mb-4" />
-            <Skeleton className="h-6 w-full mb-12" />
-            <Skeleton className="h-64 w-full" />
+        <div className="container mx-auto px-4 py-16">
+          <Skeleton className="h-8 w-32 mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-48 w-full" />
+            </div>
           </div>
-        </section>
+        </div>
       </Layout>
     );
   }
@@ -50,97 +54,177 @@ const ToolDetail = () => {
   if (!tool) {
     return (
       <Layout>
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4 max-w-4xl text-center">
-            <h1 className="text-3xl font-bold mb-4">Tool niet gevonden</h1>
-            <Link to="/tools">
-              <Button>Terug naar tools</Button>
-            </Link>
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold">Tool niet gevonden</h1>
+            <p className="text-muted-foreground">
+              De tool die je zoekt bestaat niet of is niet meer beschikbaar.
+            </p>
+            <Button asChild>
+              <Link to="/tools">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Terug naar Tools
+              </Link>
+            </Button>
           </div>
-        </section>
+        </div>
       </Layout>
     );
   }
+
+  const pricingLabel = 
+    tool.pricing_model === 'free' ? 'Gratis' : 
+    tool.pricing_model === 'freemium' ? 'Freemium' : 
+    tool.pricing_model === 'paid' ? 'Betaald' : 
+    tool.pricing_model === 'subscription' ? 'Abonnement' : 
+    tool.pricing_model;
 
   return (
     <Layout>
       <Helmet>
         <title>{tool.name} - AI Tool voor Affiliate Marketing | Beginnen Met Affiliate</title>
         <meta name="description" content={tool.tagline} />
-        <meta property="og:title" content={`${tool.name} - AI Tool`} />
+        <meta property="og:title" content={`${tool.name} - AI Tool Review`} />
         <meta property="og:description" content={tool.tagline} />
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content="article" />
         <link rel="canonical" href={`https://beginnenmetaffiliate.nl/tools/${tool.slug}`} />
       </Helmet>
 
-      <article className="py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <Link to="/tools" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            Terug naar tools
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        <Button variant="ghost" asChild className="mb-8">
+          <Link to="/tools">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Terug naar Tools
           </Link>
+        </Button>
 
-          <div className="mb-8">
-            {tool.logo_url && (
-              <img 
-                src={tool.logo_url} 
-                alt={`${tool.name} logo`}
-                className="h-16 w-16 rounded-lg mb-4 object-cover"
-              />
-            )}
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{tool.name}</h1>
-            <p className="text-xl text-muted-foreground mb-6">{tool.tagline}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-6">
-              {tool.category && (
-                <Badge variant="secondary">{tool.category.name}</Badge>
-              )}
-              {tool.pricing_model && (
-                <Badge variant="outline">{tool.pricing_model}</Badge>
-              )}
-              {tool.tool_tags?.map((tag: any, index: number) => (
-                <Badge key={index} variant="outline">{tag.tag}</Badge>
-              ))}
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <Card className="shadow-card">
+              <CardHeader>
+                <div className="flex items-start gap-4 mb-4">
+                  {tool.logo_url ? (
+                    <img 
+                      src={tool.logo_url} 
+                      alt={`${tool.name} logo`}
+                      className="h-16 w-16 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl font-bold text-primary">
+                        {tool.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CardTitle className="text-3xl">{tool.name}</CardTitle>
+                      {tool.featured && (
+                        <Badge variant="default" className="gap-1">
+                          <Star className="h-3 w-3" />
+                          Featured
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription className="text-lg">
+                      {tool.tagline}
+                    </CardDescription>
+                  </div>
+                </div>
 
-            <a 
-              href={tool.affiliate_link || tool.website_url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button size="lg" className="gap-2">
-                Bezoek website
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </a>
-          </div>
+                <div className="flex flex-wrap gap-2">
+                  {tool.category && (
+                    <Badge variant="secondary">{tool.category.name}</Badge>
+                  )}
+                  <Badge 
+                    variant="outline"
+                    className={
+                      tool.pricing_model === 'free' 
+                        ? 'border-success text-success' 
+                        : tool.pricing_model === 'freemium'
+                        ? 'border-primary text-primary'
+                        : ''
+                    }
+                  >
+                    {pricingLabel}
+                  </Badge>
+                </div>
+              </CardHeader>
 
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <h2 className="text-2xl font-semibold mb-4">Over deze tool</h2>
-              <div className="prose prose-neutral dark:prose-invert max-w-none">
-                <p className="whitespace-pre-wrap">{tool.description}</p>
-              </div>
-            </CardContent>
-          </Card>
+              <CardContent className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4">Over {tool.name}</h2>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                    {tool.description}
+                  </p>
+                </div>
 
-          {tool.tool_features && tool.tool_features.length > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-2xl font-semibold mb-4">Belangrijkste features</h2>
-                <ul className="space-y-3">
-                  {tool.tool_features.map((item: any, index: number) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <span>{item.feature}</span>
-                    </li>
-                  ))}
-                </ul>
+                {tool.tool_features && tool.tool_features.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Key Features</h3>
+                    <ul className="space-y-2">
+                      {tool.tool_features.map((feature: any, index: number) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                          <span>{feature.feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {tool.tool_tags && tool.tool_tags.length > 0 && (
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4">Tags</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {tool.tool_tags.map((tag: any, index: number) => (
+                        <Badge key={index} variant="outline">{tag.tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          )}
+          </div>
+
+          <div className="space-y-6">
+            <Card className="shadow-card sticky top-24">
+              <CardHeader>
+                <CardTitle>Bezoek {tool.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  asChild 
+                  className="w-full gradient-primary shadow-primary" 
+                  size="lg"
+                >
+                  <a 
+                    href={tool.affiliate_link || tool.website_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Bezoek Website
+                    <ExternalLink className="ml-2 h-4 w-4" />
+                  </a>
+                </Button>
+                
+                <div className="pt-4 border-t space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Prijsmodel</span>
+                    <span className="font-medium">{pricingLabel}</span>
+                  </div>
+                  {tool.category && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Categorie</span>
+                      <span className="font-medium">{tool.category.name}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </article>
+      </div>
     </Layout>
   );
 };

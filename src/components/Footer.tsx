@@ -15,7 +15,7 @@ export const Footer = () => {
               <span className="text-lg font-bold">Beginnen Met Affiliate</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Automatiseer je bedrijf met slimme AI-oplossingen voor affiliate marketing.
+              Ontdek de beste AI tools om je affiliate marketing te automatiseren en naar een hoger niveau te tillen.
             </p>
           </div>
 
@@ -29,31 +29,47 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/tools" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  AI Tools
+                </Link>
+              </li>
+              <li>
                 <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link to="/#features" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                  Diensten
-                </Link>
-              </li>
-              <li>
-                <Link to="/#pricing" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
-                  Prijzen
+                <Link to="/#contact" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+                  Contact
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Services */}
+          {/* Categories */}
           <div>
-            <h3 className="font-semibold mb-4">Diensten</h3>
+            <h3 className="font-semibold mb-4">Populaire Categorieën</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Procesautomatisering</li>
-              <li>AI Integratie</li>
-              <li>Workflow Optimalisatie</li>
-              <li>ChatBots & AI Assistenten</li>
+              <li>
+                <Link to="/tools?category=content-creatie" className="hover:text-primary transition-smooth">
+                  Content Creatie
+                </Link>
+              </li>
+              <li>
+                <Link to="/tools?category=seo-marketing" className="hover:text-primary transition-smooth">
+                  SEO & Marketing
+                </Link>
+              </li>
+              <li>
+                <Link to="/tools?category=email-automatisering" className="hover:text-primary transition-smooth">
+                  Email Automatisering
+                </Link>
+              </li>
+              <li>
+                <Link to="/tools?category=analytics" className="hover:text-primary transition-smooth">
+                  Analytics
+                </Link>
+              </li>
             </ul>
           </div>
 

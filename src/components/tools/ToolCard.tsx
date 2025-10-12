@@ -46,7 +46,22 @@ export const ToolCard = ({ tool }: ToolCardProps) => {
               <Badge variant="secondary">{tool.category.name}</Badge>
             )}
             {tool.pricing_model && (
-              <Badge variant="outline">{tool.pricing_model}</Badge>
+              <Badge 
+                variant="outline"
+                className={
+                  tool.pricing_model === 'free' 
+                    ? 'border-success text-success' 
+                    : tool.pricing_model === 'freemium'
+                    ? 'border-primary text-primary'
+                    : ''
+                }
+              >
+                {tool.pricing_model === 'free' ? 'Gratis' : 
+                 tool.pricing_model === 'freemium' ? 'Freemium' : 
+                 tool.pricing_model === 'paid' ? 'Betaald' : 
+                 tool.pricing_model === 'subscription' ? 'Abonnement' : 
+                 tool.pricing_model}
+              </Badge>
             )}
           </div>
         </CardContent>
