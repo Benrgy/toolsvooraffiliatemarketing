@@ -190,11 +190,23 @@
     box-shadow: var(--shadow-card);
   }
   
+  .shadow-card-hover {
+    box-shadow: var(--shadow-elevated);
+  }
+  
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
   
   .transition-smooth {
     transition: var(--transition-smooth);
+  }
+  
+  .hover-scale {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-scale:hover {
+    transform: translateY(-4px);
   }
 }
