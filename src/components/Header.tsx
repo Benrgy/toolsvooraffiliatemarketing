@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu, X, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -18,21 +17,10 @@ export const Header = () => {
       setIsAuthenticated(!!session);
     });
 
-    // Hidden admin access: Ctrl+Shift+A
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        navigate('/admin');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-
     return () => {
       subscription.unsubscribe();
-      window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [navigate]);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
