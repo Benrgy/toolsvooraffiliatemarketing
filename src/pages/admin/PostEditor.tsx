@@ -8,11 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
-import { ArrowLeft, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Wand2, Sparkles } from 'lucide-react';
+import { ContentGenerationModal } from '@/components/admin/ContentGenerationModal';
+import { cn } from '@/lib/utils';
+import type { GenerationConfig } from '@/types/blog';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Titel is verplicht').max(200, 'Titel te lang'),
@@ -43,6 +47,12 @@ export default function PostEditor() {
   const [metaDescription, setMetaDescription] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
   const [featuredImageAlt, setFeaturedImageAlt] = useState('');
+
+  // AI Generation states
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isGeneratingSEO, setIsGeneratingSEO] = useState(false);
+  const [showContentModal, setShowContentModal] = useState(false);
 
   useEffect(() => {
     if (isEdit) {
@@ -89,8 +99,104 @@ export default function PostEditor() {
   const generateSlug = (text: string) => {
     return text
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
+      .replace(/[^a-z0-9\s-]/g, '')  // Remove special chars except spaces/hyphens
+      .replace(/\s+/g, '-')           // Replace spaces with single hyphen
+      .replace(/-+/g, '-')            // Replace multiple hyphens with single
+      .trim();                        // Trim whitespace
+  };
+
+  // AI Content Generation Handler
+  const handleGenerateContent = async (config: GenerationConfig) => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          title,
+          wordCount: config.wordCount,
+          keywords: config.keywords,
+          includeFAQ: config.includeFAQ
+        }
+      });
+      
+      if (error) throw error;
+      
+      setContent(data.content);
+      toast({
+        title: 'Content gegenereerd! ✨',
+        description: `${data.wordCount} woorden gegenereerd met ${data.keywordsUsed.length} keywords.`,
+      });
+      setShowContentModal(false);
+    } catch (error) {
+      console.error('Content generation error:', error);
+      toast({
+        title: 'Generatie mislukt',
+        description: error instanceof Error ? error.message : 'Er is een fout opgetreden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // AI Image Generation Handler
+  const handleGenerateImage = async () => {
+    setIsGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { title }
+      });
+      
+      if (error) throw error;
+      
+      setFeaturedImage(data.imageUrl);
+      setFeaturedImageAlt(data.altText);
+      toast({
+        title: 'Afbeelding gegenereerd! 🎨',
+        description: 'Hero image succesvol aangemaakt.',
+      });
+    } catch (error) {
+      console.error('Image generation error:', error);
+      toast({
+        title: 'Image generatie mislukt',
+        description: error instanceof Error ? error.message : 'Er is een fout opgetreden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  // AI SEO Generation Handler
+  const handleGenerateSEO = async () => {
+    setIsGeneratingSEO(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-seo', {
+        body: { title, excerpt }
+      });
+      
+      if (error) throw error;
+      
+      if (!excerpt) setExcerpt(data.excerpt);
+      setMetaTitle(data.metaTitle);
+      setMetaDescription(data.metaDescription);
+      if (!featuredImageAlt && data.altText) {
+        setFeaturedImageAlt(data.altText);
+      }
+      
+      toast({
+        title: 'SEO metadata gegenereerd! 🚀',
+        description: 'Meta title en description zijn ingevuld.',
+      });
+    } catch (error) {
+      console.error('SEO generation error:', error);
+      toast({
+        title: 'SEO generatie mislukt',
+        description: error instanceof Error ? error.message : 'Er is een fout opgetreden',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsGeneratingSEO(false);
+    }
   };
 
   const handleSave = async (publish: boolean = false) => {
@@ -209,12 +315,34 @@ export default function PostEditor() {
           <TabsContent value="content" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Titel *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Voer de post titel in..."
-              />
+              <div className="relative">
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Voer de post titel in..."
+                  className="pr-12"
+                />
+                {title && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-1 top-1/2 -translate-y-1/2"
+                          onClick={() => setShowContentModal(true)}
+                          disabled={isGenerating}
+                        >
+                          <Wand2 className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Genereer blog content met AI</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -264,13 +392,43 @@ export default function PostEditor() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="featuredImage">Featured Image URL</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="featuredImage">Featured Image URL</Label>
+                {title && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleGenerateImage}
+                          disabled={isGeneratingImage}
+                        >
+                          <Wand2 className={cn("h-4 w-4 mr-2", isGeneratingImage && "animate-spin")} />
+                          {isGeneratingImage ? 'Genereren...' : 'AI Genereren'}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Genereer blog image met AI</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
               <Input
                 id="featuredImage"
                 value={featuredImage}
                 onChange={(e) => setFeaturedImage(e.target.value)}
                 placeholder="https://example.com/image.jpg"
               />
+              {featuredImage && (
+                <div className="mt-2 rounded-lg border overflow-hidden">
+                  <img 
+                    src={featuredImage} 
+                    alt={featuredImageAlt || 'Featured image preview'} 
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -285,6 +443,17 @@ export default function PostEditor() {
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGenerateSEO}
+              disabled={isGeneratingSEO || !title}
+              className="w-full mb-4"
+            >
+              <Sparkles className={cn("h-4 w-4 mr-2", isGeneratingSEO && "animate-spin")} />
+              {isGeneratingSEO ? 'Genereren...' : 'Auto-genereer alle SEO metadata'}
+            </Button>
+
             <div className="space-y-2">
               <Label htmlFor="metaTitle">Meta Titel</Label>
               <Input
@@ -343,6 +512,15 @@ export default function PostEditor() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Content Generation Modal */}
+        <ContentGenerationModal
+          open={showContentModal}
+          onOpenChange={setShowContentModal}
+          title={title}
+          onGenerate={handleGenerateContent}
+          isGenerating={isGenerating}
+        />
       </div>
     </AdminLayout>
   );
