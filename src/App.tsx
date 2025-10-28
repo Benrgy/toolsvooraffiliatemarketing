@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
 import Tools from "./pages/Tools";
 import ToolDetail from "./pages/ToolDetail";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/tools" element={<Tools />} />
           <Route path="/tools/:slug" element={<ToolDetail />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route
