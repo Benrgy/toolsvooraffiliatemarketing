@@ -3,11 +3,19 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import Tools from "./pages/Tools";
 import ToolDetail from "./pages/ToolDetail";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/auth/Login";
+import Signup from "./pages/auth/Signup";
+import Dashboard from "./pages/admin/Dashboard";
+import Posts from "./pages/admin/Posts";
+import PostEditor from "./pages/admin/PostEditor";
+import TopicalMap from "./pages/admin/TopicalMap";
+import Categories from "./pages/admin/Categories";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +30,56 @@ const App = () => (
           <Route path="/tools" element={<Tools />} />
           <Route path="/tools/:slug" element={<ToolDetail />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/posts"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Posts />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/posts/new"
+            element={
+              <ProtectedRoute requireAdmin>
+                <PostEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/posts/:id/edit"
+            element={
+              <ProtectedRoute requireAdmin>
+                <PostEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/topical-map"
+            element={
+              <ProtectedRoute requireAdmin>
+                <TopicalMap />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Categories />
+              </ProtectedRoute>
+            }
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

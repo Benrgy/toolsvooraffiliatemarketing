@@ -1,0 +1,220 @@
+{
+  "niche": "beste tools voor affiliate marketing",
+  "pillarPages": [
+    {
+      "title": "De Ultieme Gids voor Affiliate Marketing Tools in 2024",
+      "description": "Een complete overzichtsgids die alle soorten tools voor affiliate marketing uitlegt en vergelijkt.",
+      "targetKeyword": "affiliate marketing tools",
+      "searchVolume": "1900",
+      "difficulty": "High",
+      "clusters": [
+        {
+          "clusterTitle": "Linkbuilding en Outreach Tools",
+          "description": "Tools voor het vinden van backlink-kansen en het managen van outreach campagnes.",
+          "targetKeyword": "linkbuilding tools",
+          "searchVolume": "2900",
+          "difficulty": "High",
+          "supportingArticles": [
+            {
+              "title": "Hoe gebruik je Ahrefs voor linkbuilding?",
+              "targetKeyword": "ahrefs linkbuilding",
+              "searchVolume": "480",
+              "difficulty": "Medium",
+              "contentType": "How-to"
+            },
+            {
+              "title": "SEMrush vs Ahrefs voor linkanalyse",
+              "targetKeyword": "semrush vs ahrefs linkbuilding",
+              "searchVolume": "210",
+              "difficulty": "High",
+              "contentType": "Comparison"
+            },
+            {
+              "title": "Gratis alternatieven voor dure linkbuilding tools",
+              "targetKeyword": "gratis linkbuilding tools",
+              "searchVolume": "320",
+              "difficulty": "Low",
+              "contentType": "List"
+            }
+          ]
+        },
+        {
+          "clusterTitle": "Content Creatie en Optimalisatie Tools",
+          "description": "Software voor het schrijven, optimaliseren en plannen van content.",
+          "targetKeyword": "content marketing tools",
+          "searchVolume": "880",
+          "difficulty": "Medium",
+          "supportingArticles": [
+            {
+              "title": "Hoe optimaliseer je content met Surfer SEO?",
+              "targetKeyword": "surfer seo uitleg",
+              "searchVolume": "170",
+              "difficulty": "Medium",
+              "contentType": "Guide"
+            },
+            {
+              "title": "Beste AI schrijftools voor affiliate content",
+              "targetKeyword": "ai schrijftools affiliate marketing",
+              "searchVolume": "140",
+              "difficulty": "Low",
+              "contentType": "Review"
+            },
+            {
+              "title": "Hoe maak je een content kalender voor affiliate marketing?",
+              "targetKeyword": "content kalender affiliate marketing",
+              "searchVolume": "90",
+              "difficulty": "Low",
+              "contentType": "How-to"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Beste SEO Tools voor Affiliate Marketing",
+      "description": "Vergelijking en reviews van de meest effectieve SEO tools voor affiliate marketeers.",
+      "targetKeyword": "seo tools affiliate marketing",
+      "searchVolume": "1000",
+      "difficulty": "High",
+      "clusters": [
+        {
+          "clusterTitle": "Keyword Research Tools",
+          "description": "Tools voor het vinden van winstgevende zoekwoorden in de affiliate niche.",
+          "targetKeyword": "keyword research tools",
+          "searchVolume": "2400",
+          "difficulty": "Medium",
+          "supportingArticles": [
+            {
+              "title": "Keyword research voor beginners in affiliate marketing",
+              "targetKeyword": "keyword research affiliate marketing",
+              "searchVolume": "210",
+              "difficulty": "Low",
+              "contentType": "Guide"
+            },
+            {
+              "title": "Hoe vind je long-tail keywords met Ubersuggest?",
+              "targetKeyword": "ubersuggest long tail keywords",
+              "searchVolume": "110",
+              "difficulty": "Low",
+              "contentType": "How-to"
+            },
+            {
+              "title": "Beste gratis keyword tool voor affiliates",
+              "targetKeyword": "gratis keyword tool",
+              "searchVolume": "590",
+              "difficulty": "Medium",
+              "contentType": "Review"
+            }
+          ]
+        },
+        {
+          "clusterTitle": "Technische SEO Tools",
+          "description": "Tools voor het analyseren en verbeteren van de technische staat van een website.",
+          "targetKeyword": "technische seo tools",
+          "searchVolume": "480",
+          "difficulty": "Medium",
+          "supportingArticles": [
+            {
+              "title": "Hoe voer je een technische SEO audit uit?",
+              "targetKeyword": "technische seo audit",
+              "searchVolume": "210",
+              "difficulty": "Medium",
+              "contentType": "How-to"
+            },
+            {
+              "title": "Screaming Frog tutorial voor beginners",
+              "targetKeyword": "screaming frog tutorial",
+              "searchVolume": "170",
+              "difficulty": "Low",
+              "contentType": "Tutorial"
+            },
+            {
+              "title": "Beste tools voor site speed optimalisatie",
+              "targetKeyword": "tools site speed optimalisatie",
+              "searchVolume": "140",
+              "difficulty": "Medium",
+              "contentType": "List"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Beste Affiliate Link Management Tools",
+      "description": "Overzicht van tools voor het beheren, cloaken en tracken van affiliate links.",
+      "targetKeyword": "affiliate link management",
+      "searchVolume": "720",
+      "difficulty": "Medium",
+      "clusters": [
+        {
+          "clusterTitle": "Link Cloaking Tools",
+          "description": "Software voor het verkorten en verbergen van affiliate links.",
+          "targetKeyword": "affiliate link cloaking",
+          "searchVolume": "590",
+          "difficulty": "Medium",
+          "supportingArticles": [
+            {
+              "title": "Wat is affiliate link cloaking en waarom is het belangrijk?",
+              "targetKeyword": "wat is affiliate link cloaking",
+              "searchVolume": "170",
+              "difficulty": "Low",
+              "contentType": "Guide"
+            },
+            {
+              "title": "Pretty Links vs ThirstyAffiliates: welke is beter?",
+              "targetKeyword": "pretty links vs thirstyaffiliates",
+              "searchVolume": "70",
+              "difficulty": "Low",
+              "contentType": "Comparison"
+            },
+            {
+              "title": "Hoe stel je Pretty Links in op WordPress?",
+              "targetKeyword": "pretty links wordpress instellen",
+              "searchVolume": "90",
+              "difficulty": "Low",
+              "contentType": "Tutorial"
+            }
+          ]
+        },
+        {
+          "clusterTitle": "Performance Tracking Tools",
+          "description": "Tools voor het monitoren van klikken, conversies en inkomsten per link.",
+          "targetKeyword": "affiliate link tracking",
+          "searchVolume": "480",
+          "difficulty": "Medium",
+          "supportingArticles": [
+            {
+              "title": "Hoe track je affiliate conversies met Google Analytics?",
+              "targetKeyword": "affiliate conversies tracken google analytics",
+              "searchVolume": "110",
+              "difficulty": "Medium",
+              "contentType": "How-to"
+            },
+            {
+              "title": "Beste affiliate tracking software voor beginners",
+              "targetKeyword": "affiliate tracking software",
+              "searchVolume": "210",
+              "difficulty": "Medium",
+              "contentType": "Review"
+            },
+            {
+              "title": "Hoe analyseer je je affiliate link prestaties?",
+              "targetKeyword": "affiliate link prestaties analyseren",
+              "searchVolume": "50",
+              "difficulty": "Low",
+              "contentType": "Guide"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "contentStrategy": {
+    "totalArticles": 25,
+    "publishingSchedule": "2-3 artikelen per week gedurende 2 maanden, beginnend met foundation content.",
+    "priorityOrder": [
+      "Pillar pagina's eerst, dan cluster artikelen, daarna ondersteunende long-tail artikelen."
+    ],
+    "internalLinkingStrategy": "Ondersteunende artikelen linken naar hun cluster pagina, die sterk linkt naar de pillar. Pillars onderling linken waar relevant."
+  }
+}
