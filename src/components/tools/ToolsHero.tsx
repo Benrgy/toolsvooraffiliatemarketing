@@ -18,12 +18,16 @@ export const ToolsHero = ({
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-success/30 bg-success/5 text-sm font-medium text-success mb-4">
+            <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
+            <span>Trusted by 10.000+ Succesvolle Affiliate Marketers</span>
+          </div>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-            Ontdek de Beste{" "}
-            
+            Bespaar 20 Uur Per Week en Verhoog Je Conversies Met 40%
           </h1>
-          <p className="text-xl text-muted-foreground">Ontdek de Beste Tools voor Affiliate Marketing.
-        </p>
+          <p className="text-xl text-muted-foreground">
+            De complete toolkit die topverdieners gebruiken - van content creatie tot conversie optimalisatie. Gratis en betaalde opties.
+          </p>
           
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />

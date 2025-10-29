@@ -50,8 +50,8 @@ const generateFAQSchema = (content: string) => {
 
 export const BlogSEO = ({ post, baseUrl = "https://beginnenmetaffiliate.nl" }: BlogSEOProps) => {
   const canonicalUrl = `${baseUrl}/blog/${post.slug}`;
-  const pageTitle = post.meta_title || `${post.title} - BeginnenMetAffiliate.nl`;
-  const pageDescription = post.meta_description || post.excerpt || `Lees "${post.title}" - expert inzichten over affiliate marketing met AI.`;
+  const pageTitle = post.meta_title || `${post.title} - Bewezen Strategie 2025`;
+  const pageDescription = post.meta_description || post.excerpt || `De geheime ${post.title.toLowerCase()} strategie die 1000+ affiliate marketers nu gebruiken. Bewezen resultaten, zelfs voor beginners.`;
   
   const blogPostSchema = {
     "@context": "https://schema.org",

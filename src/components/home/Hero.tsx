@@ -12,19 +12,17 @@ export const Hero = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in-up">
-          <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <Sparkles className="h-4 w-4" />
-            <span>Handgeselecteerde AI Tools Directory</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-success/30 bg-success/5 text-sm font-medium">
+            <Sparkles className="h-4 w-4 text-success" />
+            <span>Join 10.000+ Succesvolle Affiliate Marketers</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-            Ontdek de Beste{" "}
-            
-            {" "}voor Affiliate Marketing
+            Verdubbel Je Affiliate Inkomsten in 90 Dagen - Zonder Extra Werkuren
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-            Vind handige AI automatiseringstools om je affiliate marketing naar een hoger niveau te tillen
+            Bewezen AI tools en strategieën die je €3.000+ per maand extra opleveren. Zelfs als je vandaag begint.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">

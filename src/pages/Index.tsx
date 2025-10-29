@@ -9,15 +9,15 @@ const Index = () => {
   return (
     <Layout>
       <Helmet>
-        <title>Beginnen Met Affiliate Marketing - Ontdek de Beste AI Tools</title>
+        <title>Verhoog Je Affiliate Inkomsten Met 40% in 90 Dagen</title>
         <meta
           name="description"
-          content="Vind de beste AI tools om je affiliate marketing te automatiseren. Van content creatie tot conversie optimalisatie - ontdek handige tools."
+          content="Ontdek de geheime AI tools die 10.000+ affiliate marketers gebruiken om hun inkomsten te verdubbelen - zonder extra werkuren. Bewezen methode, gratis te starten."
         />
-        <meta property="og:title" content="AI Tools voor Affiliate Marketing Automatisering" />
+        <meta property="og:title" content="Verhoog Je Affiliate Inkomsten Met 40% in 90 Dagen" />
         <meta
           property="og:description"
-          content="Ontdek handige AI automatiseringstools voor affiliate marketing succes"
+          content="Join 10.000+ succesvolle affiliate marketers die hun inkomsten verdubbelden met deze AI tools"
         />
         <meta property="og:type" content="website" />
         <link rel="canonical" href="https://beginnenmetaffiliate.nl/" />

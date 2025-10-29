@@ -82,10 +82,10 @@ const ToolDetail = () => {
   return (
     <Layout>
       <Helmet>
-        <title>{tool.name} - AI Tool voor Affiliate Marketing | Beginnen Met Affiliate</title>
-        <meta name="description" content={tool.tagline} />
-        <meta property="og:title" content={`${tool.name} - AI Tool Review`} />
-        <meta property="og:description" content={tool.tagline} />
+        <title>{tool.name} Review 2025: Verhoog Je Conversies Met Deze AI Tool</title>
+        <meta name="description" content={`${tool.tagline} - Ontdek waarom 1000+ affiliate marketers ${tool.name} vertrouwen. Eerlijke review met voor- en nadelen.`} />
+        <meta property="og:title" content={`${tool.name} Review 2025: Waarom 1000+ Marketers Deze Tool Gebruiken`} />
+        <meta property="og:description" content={`${tool.tagline} - Bewezen resultaten voor affiliate marketing succes`} />
         <meta property="og:type" content="article" />
         <link rel="canonical" href={`https://beginnenmetaffiliate.nl/tools/${tool.slug}`} />
       </Helmet>

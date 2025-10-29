@@ -7,11 +7,11 @@ const Blog = () => {
   return (
     <Layout>
       <Helmet>
-        <title>AI Affiliate Marketing Blog - Tips & Strategieën</title>
-        <meta name="title" content="AI Affiliate Marketing Blog - Tips & Strategieën" />
+        <title>De Geheimen Die Topverdieners Niet Delen Over AI</title>
+        <meta name="title" content="De Geheimen Die Topverdieners Niet Delen Over AI" />
         <meta
           name="description"
-          content="Ontdek de beste tips, trucs en strategieën voor affiliate marketing met AI automatisering. Leer hoe je je inkomsten maximaliseert."
+          content="Wat niemand je vertelt over affiliate marketing succes met AI - bewezen strategieën van €10K+ per maand verdieners. Zelfs als je vandaag begint."
         />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://beginnenmetaffiliate.nl/blog" />
@@ -19,18 +19,18 @@ const Blog = () => {
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://beginnenmetaffiliate.nl/blog" />
-        <meta property="og:title" content="AI Affiliate Marketing Blog - Tips & Strategieën" />
+        <meta property="og:title" content="De Geheimen Die Topverdieners Niet Delen Over AI" />
         <meta
           property="og:description"
-          content="Tips en strategieën voor affiliate marketing met AI automatisering."
+          content="Join 10.000+ lezers die nu €3.000+ per maand verdienen - bewezen AI strategieën"
         />
         <meta property="og:site_name" content="BeginnenMetAffiliate.nl" />
         <meta property="og:locale" content="nl_NL" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="AI Affiliate Marketing Blog - Tips & Strategieën" />
-        <meta name="twitter:description" content="Tips en strategieën voor affiliate marketing met AI automatisering." />
+        <meta name="twitter:title" content="De Geheimen Die Topverdieners Niet Delen Over AI" />
+        <meta name="twitter:description" content="Bewezen AI strategieën van €10K+ per maand verdieners - zelfs voor beginners" />
       </Helmet>
 
       <BlogHero />
