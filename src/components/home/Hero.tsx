@@ -2,17 +2,11 @@ import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-
 export const Hero = () => {
-  return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+  return <section className="relative py-20 md:py-32 overflow-hidden">
       {/* Background image with overlay */}
       <div className="absolute inset-0">
-        <img 
-          src={heroBg} 
-          alt="Professional workspace" 
-          className="w-full h-full object-cover"
-        />
+        <img src={heroBg} alt="Professional workspace" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85" />
       </div>
 
@@ -25,9 +19,7 @@ export const Hero = () => {
 
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             Ontdek de Beste{" "}
-            <span className="gradient-primary bg-clip-text text-transparent">
-              AI Tools
-            </span>
+            
             {" "}voor Affiliate Marketing
           </h1>
 
@@ -36,11 +28,7 @@ export const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button
-              asChild
-              size="lg"
-              className="gradient-primary shadow-primary text-lg h-14 px-8"
-            >
+            <Button asChild size="lg" className="gradient-primary shadow-primary text-lg h-14 px-8">
               <Link to="/tools">
                 Ontdek Alle Tools
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -68,6 +56,5 @@ export const Hero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
