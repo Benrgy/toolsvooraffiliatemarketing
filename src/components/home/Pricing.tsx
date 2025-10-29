@@ -83,7 +83,7 @@ export const Pricing = () => {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <Badge className="gradient-primary shadow-primary">
+                  <Badge variant="outline" className="border-success text-success">
                     Meest Gekozen
                   </Badge>
                 </div>

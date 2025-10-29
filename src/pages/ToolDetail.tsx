@@ -120,7 +120,7 @@ const ToolDetail = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-3xl">{tool.name}</CardTitle>
                       {tool.featured && (
-                        <Badge variant="default" className="gap-1">
+                        <Badge variant="outline" className="gap-1 border-primary text-primary">
                           <Star className="h-3 w-3" />
                           Featured
                         </Badge>

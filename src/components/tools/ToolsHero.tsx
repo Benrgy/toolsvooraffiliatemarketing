@@ -13,7 +13,7 @@ export const ToolsHero = ({
       {/* Background image with overlay */}
       <div className="absolute inset-0">
         <img src={toolsHeroBg} alt="Digital workspace with AI tools" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-primary/20" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85" />
       </div>
       
       <div className="container mx-auto px-4 relative z-10">

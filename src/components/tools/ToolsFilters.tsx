@@ -58,20 +58,20 @@ export const ToolsFilters = ({
             <h3 className="text-sm font-semibold mb-3">Categorieën</h3>
             <div className="flex gap-2 overflow-x-auto pb-2">
               <Button
-                variant={selectedCategory === null ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => onCategoryChange(null)}
-                className="flex-shrink-0"
+                className={`flex-shrink-0 ${selectedCategory === null ? 'border-primary text-primary' : ''}`}
               >
                 Alle
               </Button>
               {categories?.map((category) => (
                 <Button
                   key={category.id}
-                  variant={selectedCategory === category.slug ? "default" : "outline"}
+                  variant="outline"
                   size="sm"
                   onClick={() => onCategoryChange(category.slug)}
-                  className="flex-shrink-0"
+                  className={`flex-shrink-0 ${selectedCategory === category.slug ? 'border-primary text-primary' : ''}`}
                 >
                   {category.name}
                 </Button>
@@ -83,20 +83,20 @@ export const ToolsFilters = ({
             <h3 className="text-sm font-semibold mb-3">Prijsmodel</h3>
             <div className="flex gap-2 overflow-x-auto pb-2">
               <Button
-                variant={selectedPricing === null ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => onPricingChange(null)}
-                className="flex-shrink-0"
+                className={`flex-shrink-0 ${selectedPricing === null ? 'border-primary text-primary' : ''}`}
               >
                 Alle
               </Button>
               {pricingOptions.map((option) => (
                 <Button
                   key={option.value}
-                  variant={selectedPricing === option.value ? "default" : "outline"}
+                  variant="outline"
                   size="sm"
                   onClick={() => onPricingChange(option.value)}
-                  className="flex-shrink-0"
+                  className={`flex-shrink-0 ${selectedPricing === option.value ? 'border-primary text-primary' : ''}`}
                 >
                   {option.label}
                 </Button>

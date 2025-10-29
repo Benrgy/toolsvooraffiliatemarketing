@@ -27,7 +27,7 @@ export const ToolCard = ({ tool }: ToolCardProps) => {
               </div>
             )}
             {tool.featured && (
-              <Badge variant="default" className="gap-1">
+              <Badge variant="outline" className="gap-1 border-primary text-primary">
                 <Star className="h-3 w-3" />
                 Featured
               </Badge>
