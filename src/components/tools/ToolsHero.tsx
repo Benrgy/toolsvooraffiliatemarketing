@@ -22,9 +22,8 @@ export const ToolsHero = ({
             Ontdek de Beste{" "}
             
           </h1>
-          <p className="text-xl text-muted-foreground">
-            Handgeselecteerde AI automatiseringstools om je affiliate marketing naar een hoger niveau te tillen
-          </p>
+          <p className="text-xl text-muted-foreground">Ontdek de Beste Tools voor Affiliate Marketing.
+        </p>
           
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
