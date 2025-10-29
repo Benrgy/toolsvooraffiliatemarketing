@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import toolsHeroBg from "@/assets/tools-hero-bg.jpg";
 
 interface ToolsHeroProps {
   searchQuery: string;
@@ -8,8 +9,16 @@ interface ToolsHeroProps {
 
 export const ToolsHero = ({ searchQuery, onSearchChange }: ToolsHeroProps) => {
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+    <section className="relative py-20 md:py-32 overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0">
+        <img 
+          src={toolsHeroBg} 
+          alt="Digital workspace with AI tools" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-primary/20" />
+      </div>
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in">

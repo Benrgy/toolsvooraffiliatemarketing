@@ -1,14 +1,19 @@
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
+import heroBg from "@/assets/hero-bg.jpg";
 
 export const Hero = () => {
   return (
-    <section className="relative gradient-hero py-20 md:py-32 overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+    <section className="relative py-20 md:py-32 overflow-hidden">
+      {/* Background image with overlay */}
+      <div className="absolute inset-0">
+        <img 
+          src={heroBg} 
+          alt="Professional workspace" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/85" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
