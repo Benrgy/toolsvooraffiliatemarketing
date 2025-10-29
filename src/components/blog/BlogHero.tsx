@@ -1,8 +1,6 @@
 import { Sparkles } from "lucide-react";
-
 export const BlogHero = () => {
-  return (
-    <section className="gradient-hero py-16 md:py-24">
+  return <section className="gradient-hero py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in">
           <div className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -12,9 +10,7 @@ export const BlogHero = () => {
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             AI Affiliate Marketing{" "}
-            <span className="gradient-primary bg-clip-text text-transparent">
-              Blog
-            </span>
+            
           </h1>
 
           <p className="text-xl text-muted-foreground">
@@ -22,6 +18,5 @@ export const BlogHero = () => {
           </p>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
