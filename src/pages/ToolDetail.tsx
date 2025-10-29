@@ -110,7 +110,7 @@ const ToolDetail = () => {
                       className="h-16 w-16 rounded-lg object-cover"
                     />
                   ) : (
-                    <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="h-16 w-16 rounded-lg border border-border bg-transparent flex items-center justify-center flex-shrink-0">
                       <span className="text-2xl font-bold text-primary">
                         {tool.name.charAt(0)}
                       </span>

@@ -60,7 +60,7 @@ export const Features = () => {
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <CardHeader>
-                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-smooth">
+                  <div className="h-12 w-12 rounded-lg flex items-center justify-center mb-4 transition-smooth">
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
                   <CardTitle className="text-xl">{feature.title}</CardTitle>

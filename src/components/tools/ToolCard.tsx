@@ -20,7 +20,7 @@ export const ToolCard = ({ tool }: ToolCardProps) => {
                 className="h-12 w-12 rounded-lg object-cover"
               />
             ) : (
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-lg border border-border bg-transparent flex items-center justify-center">
                 <span className="text-xl font-bold text-primary">
                   {tool.name.charAt(0)}
                 </span>
