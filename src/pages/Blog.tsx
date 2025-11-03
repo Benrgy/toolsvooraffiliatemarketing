@@ -31,6 +31,42 @@ const Blog = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="De Geheimen Die Topverdieners Niet Delen Over AI" />
         <meta name="twitter:description" content="Bewezen AI strategieën van €10K+ per maand verdieners - zelfs voor beginners" />
+        
+        {/* Blog Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Blog",
+            "name": "BeginnenMetAffiliate Blog",
+            "description": "Bewezen affiliate marketing strategieën met AI - van beginners tot €10K+ per maand",
+            "url": "https://beginnenmetaffiliate.nl/blog",
+            "publisher": {
+              "@type": "Organization",
+              "name": "BeginnenMetAffiliate.nl",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://beginnenmetaffiliate.nl/logo.png"
+              }
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://beginnenmetaffiliate.nl"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Blog",
+                  "item": "https://beginnenmetaffiliate.nl/blog"
+                }
+              ]
+            }
+          })}
+        </script>
       </Helmet>
 
       <BlogHero />

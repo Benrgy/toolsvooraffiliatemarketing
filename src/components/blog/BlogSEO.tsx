@@ -81,6 +81,31 @@ export const BlogSEO = ({ post, baseUrl = "https://beginnenmetaffiliate.nl" }: B
     }
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Blog",
+        "item": `${baseUrl}/blog`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": post.title,
+        "item": canonicalUrl
+      }
+    ]
+  };
+
   const faqSchema = post.content ? generateFAQSchema(post.content) : null;
 
   return (
@@ -117,6 +142,10 @@ export const BlogSEO = ({ post, baseUrl = "https://beginnenmetaffiliate.nl" }: B
       {/* JSON-LD Structured Data */}
       <script type="application/ld+json">
         {JSON.stringify(blogPostSchema)}
+      </script>
+      
+      <script type="application/ld+json">
+        {JSON.stringify(breadcrumbSchema)}
       </script>
       
       {faqSchema && (

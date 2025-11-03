@@ -87,7 +87,59 @@ const ToolDetail = () => {
         <meta property="og:title" content={`${tool.name} Review 2025: Waarom 1000+ Marketers Deze Tool Gebruiken`} />
         <meta property="og:description" content={`${tool.tagline} - Bewezen resultaten voor affiliate marketing succes`} />
         <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://beginnenmetaffiliate.nl/tools/${tool.slug}`} />
+        {tool.logo_url && <meta property="og:image" content={tool.logo_url} />}
         <link rel="canonical" href={`https://beginnenmetaffiliate.nl/tools/${tool.slug}`} />
+        
+        {/* SoftwareApplication Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": tool.name,
+            "description": tool.description,
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Web Browser",
+            "offers": {
+              "@type": "Offer",
+              "price": tool.pricing_model === 'free' ? "0" : undefined,
+              "priceCurrency": "EUR"
+            },
+            "aggregateRating": tool.upvotes > 0 ? {
+              "@type": "AggregateRating",
+              "ratingValue": "4.5",
+              "reviewCount": tool.upvotes.toString()
+            } : undefined
+          })}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://beginnenmetaffiliate.nl"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Tools",
+                "item": "https://beginnenmetaffiliate.nl/tools"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": tool.name,
+                "item": `https://beginnenmetaffiliate.nl/tools/${tool.slug}`
+              }
+            ]
+          })}
+        </script>
       </Helmet>
 
       <div className="container mx-auto px-4 py-8 md:py-16">

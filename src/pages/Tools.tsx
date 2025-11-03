@@ -24,7 +24,36 @@ const Tools = () => {
           content="Trusted by 10.000+ marketers - bespaar 20 uur per week en verhoog conversies met 40%"
         />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://beginnenmetaffiliate.nl/tools" />
         <link rel="canonical" href="https://beginnenmetaffiliate.nl/tools" />
+        
+        {/* CollectionPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Beste AI Tools voor Affiliate Marketing",
+            "description": "Uitgebreide collectie van AI tools die affiliate marketers helpen om tijd te besparen en conversies te verhogen",
+            "url": "https://beginnenmetaffiliate.nl/tools",
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://beginnenmetaffiliate.nl"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Tools",
+                  "item": "https://beginnenmetaffiliate.nl/tools"
+                }
+              ]
+            }
+          })}
+        </script>
       </Helmet>
       
       <ToolsHero 

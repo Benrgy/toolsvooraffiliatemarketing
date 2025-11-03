@@ -20,7 +20,39 @@ const Index = () => {
           content="Join 10.000+ succesvolle affiliate marketers die hun inkomsten verdubbelden met deze AI tools"
         />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://beginnenmetaffiliate.nl/" />
         <link rel="canonical" href="https://beginnenmetaffiliate.nl/" />
+        
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "BeginnenMetAffiliate.nl",
+            "url": "https://beginnenmetaffiliate.nl",
+            "logo": "https://beginnenmetaffiliate.nl/logo.png",
+            "description": "Dé Nederlandse autoriteit voor affiliate marketing met AI tools en strategieën",
+            "sameAs": [
+              "https://www.facebook.com/beginnenmetaffiliate",
+              "https://twitter.com/beginaffiliate"
+            ]
+          })}
+        </script>
+        
+        {/* WebSite Schema with SearchAction */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "BeginnenMetAffiliate.nl",
+            "url": "https://beginnenmetaffiliate.nl",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://beginnenmetaffiliate.nl/tools?search={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
       </Helmet>
       
       <Hero />
