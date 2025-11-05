@@ -116,47 +116,50 @@ export default function PostEditor() {
       return;
     }
 
-    setTitle(data.title || '');
-    setSlug(data.slug || '');
-    setExcerpt(data.excerpt || '');
-    setContent(data.content || '');
-    setCategory(data.category || '');
-    setStatus((data.status as 'draft' | 'published') || 'draft');
-    setFeatured(data.featured || false);
-    setMetaTitle(data.meta_title || '');
-    setMetaDescription(data.meta_description || '');
-    setFeaturedImage(data.featured_image || '');
-    setFeaturedImageAlt(data.featured_image_alt || '');
-    setFeaturedImageTitle(data.featured_image_title || '');
-    setFeaturedImageCaption(data.featured_image_caption || '');
+    // Type assertion for new fields until types regenerate
+    const post = data as any;
+
+    setTitle(post.title || '');
+    setSlug(post.slug || '');
+    setExcerpt(post.excerpt || '');
+    setContent(post.content || '');
+    setCategory(post.category || '');
+    setStatus((post.status as 'draft' | 'published') || 'draft');
+    setFeatured(post.featured || false);
+    setMetaTitle(post.meta_title || '');
+    setMetaDescription(post.meta_description || '');
+    setFeaturedImage(post.featured_image || '');
+    setFeaturedImageAlt(post.featured_image_alt || '');
+    setFeaturedImageTitle(post.featured_image_title || '');
+    setFeaturedImageCaption(post.featured_image_caption || '');
     
     // Advanced SEO
-    setFocusKeyword(data.focus_keyword || '');
-    setSecondaryKeywords(data.secondary_keywords || []);
-    setMetaKeywords(data.meta_keywords || []);
-    setArticleTags(data.article_tags || []);
-    setSchemaType(data.schema_type || 'BlogPosting');
+    setFocusKeyword(post.focus_keyword || '');
+    setSecondaryKeywords(post.secondary_keywords || []);
+    setMetaKeywords(post.meta_keywords || []);
+    setArticleTags(post.article_tags || []);
+    setSchemaType(post.schema_type || 'BlogPosting');
     
     // Geo-targeting
-    setGeoTargetCountry(data.geo_target_country || 'NL');
-    setGeoTargetLanguage(data.geo_target_language || 'nl-NL');
+    setGeoTargetCountry(post.geo_target_country || 'NL');
+    setGeoTargetLanguage(post.geo_target_language || 'nl-NL');
     
     // Video
-    setVideoUrl(data.video_url || '');
-    setVideoThumbnailUrl(data.video_thumbnail_url || '');
-    setVideoDuration(data.video_duration || '');
-    setVideoDescription(data.video_description || '');
+    setVideoUrl(post.video_url || '');
+    setVideoThumbnailUrl(post.video_thumbnail_url || '');
+    setVideoDuration(post.video_duration || '');
+    setVideoDescription(post.video_description || '');
     
     // E-E-A-T
-    setFactChecked(data.fact_checked || false);
-    setExpertReviewed(data.expert_reviewed || false);
-    setReviewRating(data.review_rating);
-    setReviewCount(data.review_count);
+    setFactChecked(post.fact_checked || false);
+    setExpertReviewed(post.expert_reviewed || false);
+    setReviewRating(post.review_rating);
+    setReviewCount(post.review_count);
     
     // Social
-    setTwitterCardType(data.twitter_card_type || 'summary_large_image');
-    setPinterestDescription(data.pinterest_description || '');
-    setLinkedinTitle(data.linkedin_title || '');
+    setTwitterCardType(post.twitter_card_type || 'summary_large_image');
+    setPinterestDescription(post.pinterest_description || '');
+    setLinkedinTitle(post.linkedin_title || '');
   };
 
   const generateSlug = (text: string) => {
@@ -535,47 +538,343 @@ export default function PostEditor() {
                 placeholder="Beschrijving van de afbeelding"
               />
             </div>
-          </TabsContent>
-
-          <TabsContent value="seo" className="space-y-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleGenerateSEO}
-              disabled={isGeneratingSEO || !title}
-              className="w-full mb-4"
-            >
-              <Sparkles className={cn("h-4 w-4 mr-2", isGeneratingSEO && "animate-spin")} />
-              {isGeneratingSEO ? 'Genereren...' : 'Auto-genereer alle SEO metadata'}
-            </Button>
 
             <div className="space-y-2">
-              <Label htmlFor="metaTitle">Meta Titel</Label>
+              <Label htmlFor="featuredImageTitle">Featured Image Title</Label>
               <Input
-                id="metaTitle"
-                value={metaTitle}
-                onChange={(e) => setMetaTitle(e.target.value)}
-                placeholder="SEO titel..."
-                maxLength={60}
+                id="featuredImageTitle"
+                value={featuredImageTitle}
+                onChange={(e) => setFeaturedImageTitle(e.target.value)}
+                placeholder="Titel voor de afbeelding"
               />
-              <p className="text-sm text-muted-foreground">
-                {metaTitle.length}/60 karakters
-              </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="metaDescription">Meta Beschrijving</Label>
-              <Textarea
-                id="metaDescription"
-                value={metaDescription}
-                onChange={(e) => setMetaDescription(e.target.value)}
-                placeholder="SEO beschrijving..."
-                rows={3}
-                maxLength={160}
+              <Label htmlFor="featuredImageCaption">Featured Image Caption</Label>
+              <Input
+                id="featuredImageCaption"
+                value={featuredImageCaption}
+                onChange={(e) => setFeaturedImageCaption(e.target.value)}
+                placeholder="Bijschrift voor de afbeelding"
               />
+            </div>
+
+            {featuredImage && (
+              <ImageOptimizer
+                imageUrl={featuredImage}
+                altText={featuredImageAlt}
+                onUpdate={(updates) => {
+                  setFeaturedImageAlt(updates.alt);
+                  setFeaturedImageTitle(updates.title || '');
+                  setFeaturedImageCaption(updates.caption || '');
+                }}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="seo" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleGenerateSEO}
+                  disabled={isGeneratingSEO || !title}
+                  className="w-full"
+                >
+                  <Sparkles className={cn("h-4 w-4 mr-2", isGeneratingSEO && "animate-spin")} />
+                  {isGeneratingSEO ? 'Genereren...' : 'Auto-genereer SEO metadata'}
+                </Button>
+
+                <div className="space-y-2">
+                  <Label htmlFor="metaTitle">Meta Titel</Label>
+                  <Input
+                    id="metaTitle"
+                    value={metaTitle}
+                    onChange={(e) => setMetaTitle(e.target.value)}
+                    placeholder="SEO titel..."
+                    maxLength={60}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {metaTitle.length}/60 karakters
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="metaDescription">Meta Beschrijving</Label>
+                  <Textarea
+                    id="metaDescription"
+                    value={metaDescription}
+                    onChange={(e) => setMetaDescription(e.target.value)}
+                    placeholder="SEO beschrijving..."
+                    rows={3}
+                    maxLength={160}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {metaDescription.length}/160 karakters
+                  </p>
+                </div>
+              </div>
+
+              <SEOAnalyzerPanel
+                title={title}
+                content={content}
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                focusKeyword={focusKeyword}
+                slug={slug}
+                featuredImageAlt={featuredImageAlt}
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="advanced" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="focusKeyword">Focus Keyword</Label>
+              <Input
+                id="focusKeyword"
+                value={focusKeyword}
+                onChange={(e) => setFocusKeyword(e.target.value)}
+                placeholder="main keyword"
+              />
+              <p className="text-xs text-muted-foreground">Het primaire keyword voor deze post</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="secondaryKeywords">Secondary Keywords</Label>
+              <Input
+                id="secondaryKeywords"
+                value={secondaryKeywords.join(', ')}
+                onChange={(e) => setSecondaryKeywords(e.target.value.split(',').map(k => k.trim()).filter(Boolean))}
+                placeholder="keyword 1, keyword 2, keyword 3"
+              />
+              <p className="text-xs text-muted-foreground">Komma-gescheiden lijst van gerelateerde keywords</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="metaKeywords">Meta Keywords</Label>
+              <Input
+                id="metaKeywords"
+                value={metaKeywords.join(', ')}
+                onChange={(e) => setMetaKeywords(e.target.value.split(',').map(k => k.trim()).filter(Boolean))}
+                placeholder="tag1, tag2, tag3"
+              />
+              <p className="text-xs text-muted-foreground">Legacy meta keywords (optioneel)</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="articleTags">Article Tags</Label>
+              <Input
+                id="articleTags"
+                value={articleTags.join(', ')}
+                onChange={(e) => setArticleTags(e.target.value.split(',').map(k => k.trim()).filter(Boolean))}
+                placeholder="tag1, tag2, tag3"
+              />
+              <p className="text-xs text-muted-foreground">Tags voor de artikel classificatie</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="schemaType">Schema Type</Label>
+              <Select value={schemaType} onValueChange={setSchemaType}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BlogPosting">Blog Posting</SelectItem>
+                  <SelectItem value="Article">Article</SelectItem>
+                  <SelectItem value="NewsArticle">News Article</SelectItem>
+                  <SelectItem value="TechArticle">Tech Article</SelectItem>
+                  <SelectItem value="Review">Review</SelectItem>
+                  <SelectItem value="HowTo">How-To Guide</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">Type structured data schema</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="geo" className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Geo-Targeting
+              </h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="geoTargetCountry">Target Land</Label>
+                <Select value={geoTargetCountry} onValueChange={setGeoTargetCountry}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NL">Nederland</SelectItem>
+                    <SelectItem value="BE">België</SelectItem>
+                    <SelectItem value="US">Verenigde Staten</SelectItem>
+                    <SelectItem value="GB">Verenigd Koninkrijk</SelectItem>
+                    <SelectItem value="DE">Duitsland</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="geoTargetLanguage">Target Taal</Label>
+                <Select value={geoTargetLanguage} onValueChange={setGeoTargetLanguage}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nl-NL">Nederlands (NL)</SelectItem>
+                    <SelectItem value="nl-BE">Nederlands (BE)</SelectItem>
+                    <SelectItem value="en-US">Engels (US)</SelectItem>
+                    <SelectItem value="en-GB">Engels (GB)</SelectItem>
+                    <SelectItem value="de-DE">Duits</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-lg font-semibold">Social Media Optimalisatie</h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="twitterCardType">Twitter Card Type</Label>
+                <Select value={twitterCardType} onValueChange={setTwitterCardType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Summary</SelectItem>
+                    <SelectItem value="summary_large_image">Summary Large Image</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pinterestDescription">Pinterest Description</Label>
+                <Textarea
+                  id="pinterestDescription"
+                  value={pinterestDescription}
+                  onChange={(e) => setPinterestDescription(e.target.value)}
+                  placeholder="Aangepaste beschrijving voor Pinterest..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="linkedinTitle">LinkedIn Title Override</Label>
+                <Input
+                  id="linkedinTitle"
+                  value={linkedinTitle}
+                  onChange={(e) => setLinkedinTitle(e.target.value)}
+                  placeholder="Aangepaste titel voor LinkedIn"
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="eeat" className="space-y-6">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                E-E-A-T Signalen
+              </h3>
               <p className="text-sm text-muted-foreground">
-                {metaDescription.length}/160 karakters
+                Experience, Expertise, Authoritativeness, Trustworthiness
               </p>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <Label>Fact Checked</Label>
+                  <p className="text-sm text-muted-foreground">Content is geverifieerd en fact-checked</p>
+                </div>
+                <Switch checked={factChecked} onCheckedChange={setFactChecked} />
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <Label>Expert Reviewed</Label>
+                  <p className="text-sm text-muted-foreground">Content is gereviewed door een expert</p>
+                </div>
+                <Switch checked={expertReviewed} onCheckedChange={setExpertReviewed} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reviewRating">Review Rating (1-5)</Label>
+                <Input
+                  id="reviewRating"
+                  type="number"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={reviewRating || ''}
+                  onChange={(e) => setReviewRating(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="4.5"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="reviewCount">Review Count</Label>
+                <Input
+                  id="reviewCount"
+                  type="number"
+                  min="0"
+                  value={reviewCount || ''}
+                  onChange={(e) => setReviewCount(e.target.value ? parseInt(e.target.value) : undefined)}
+                  placeholder="42"
+                />
+              </div>
+            </div>
+
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Video className="h-5 w-5" />
+                Video Schema
+              </h3>
+
+              <div className="space-y-2">
+                <Label htmlFor="videoUrl">Video URL</Label>
+                <Input
+                  id="videoUrl"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+              </div>
+
+              {videoUrl && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="videoThumbnailUrl">Video Thumbnail URL</Label>
+                    <Input
+                      id="videoThumbnailUrl"
+                      value={videoThumbnailUrl}
+                      onChange={(e) => setVideoThumbnailUrl(e.target.value)}
+                      placeholder="https://img.youtube.com/vi/..."
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="videoDuration">Video Duration (ISO 8601)</Label>
+                    <Input
+                      id="videoDuration"
+                      value={videoDuration}
+                      onChange={(e) => setVideoDuration(e.target.value)}
+                      placeholder="PT10M30S"
+                    />
+                    <p className="text-xs text-muted-foreground">Formaat: PT[uur]H[minuten]M[seconden]S (bijv. PT10M30S)</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="videoDescription">Video Beschrijving</Label>
+                    <Textarea
+                      id="videoDescription"
+                      value={videoDescription}
+                      onChange={(e) => setVideoDescription(e.target.value)}
+                      placeholder="Beschrijving van de video..."
+                      rows={3}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </TabsContent>
 
