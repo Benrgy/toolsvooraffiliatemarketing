@@ -18,6 +18,7 @@ import { ContentGenerationModal } from '@/components/admin/ContentGenerationModa
 import { SEOAnalyzerPanel } from '@/components/admin/SEOAnalyzerPanel';
 import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
 import { RichSnippetPreview } from '@/components/admin/RichSnippetPreview';
+import { StructuredDataValidator } from '@/components/admin/StructuredDataValidator';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -641,6 +642,25 @@ export default function PostEditor() {
                 factChecked={factChecked}
                 expertReviewed={expertReviewed}
                 schemaType={schemaType}
+              />
+
+              <StructuredDataValidator
+                title={title}
+                content={content}
+                metaTitle={metaTitle}
+                metaDescription={metaDescription}
+                featuredImage={featuredImage}
+                featuredImageAlt={featuredImageAlt}
+                videoUrl={videoUrl}
+                videoThumbnailUrl={videoThumbnailUrl}
+                videoDuration={videoDuration}
+                videoDescription={videoDescription}
+                reviewRating={reviewRating}
+                reviewCount={reviewCount}
+                factChecked={factChecked}
+                expertReviewed={expertReviewed}
+                schemaType={schemaType}
+                slug={slug}
               />
             </div>
           </TabsContent>
