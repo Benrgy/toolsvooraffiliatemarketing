@@ -40,42 +40,172 @@ export type Database = {
       }
       authors: {
         Row: {
+          author_schema_type: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          credentials: string | null
           email: string | null
+          expertise_areas: string[] | null
+          google_scholar_url: string | null
           id: string
           linkedin_url: string | null
           name: string
           twitter_handle: string | null
+          twitter_url: string | null
           updated_at: string | null
           website: string | null
+          website_url: string | null
+          years_experience: number | null
         }
         Insert: {
+          author_schema_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          credentials?: string | null
           email?: string | null
+          expertise_areas?: string[] | null
+          google_scholar_url?: string | null
           id?: string
           linkedin_url?: string | null
           name: string
           twitter_handle?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
           website?: string | null
+          website_url?: string | null
+          years_experience?: number | null
         }
         Update: {
+          author_schema_type?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          credentials?: string | null
           email?: string | null
+          expertise_areas?: string[] | null
+          google_scholar_url?: string | null
           id?: string
           linkedin_url?: string | null
           name?: string
           twitter_handle?: string | null
+          twitter_url?: string | null
           updated_at?: string | null
           website?: string | null
+          website_url?: string | null
+          years_experience?: number | null
         }
         Relationships: []
+      }
+      backlink_quality_history: {
+        Row: {
+          backlink_id: string
+          checked_at: string
+          domain_authority: number | null
+          id: string
+          relevance_score: number | null
+          spam_score: number | null
+          status: string
+        }
+        Insert: {
+          backlink_id: string
+          checked_at?: string
+          domain_authority?: number | null
+          id?: string
+          relevance_score?: number | null
+          spam_score?: number | null
+          status: string
+        }
+        Update: {
+          backlink_id?: string
+          checked_at?: string
+          domain_authority?: number | null
+          id?: string
+          relevance_score?: number | null
+          spam_score?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backlink_quality_history_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      backlinks: {
+        Row: {
+          anchor_text: string | null
+          context_snippet: string | null
+          created_at: string
+          discovered_at: string
+          domain_authority: number | null
+          id: string
+          last_checked_at: string
+          link_type: string
+          notes: string | null
+          page_title: string | null
+          post_id: string | null
+          relevance_score: number | null
+          source_domain: string
+          source_url: string
+          spam_score: number | null
+          status: string
+          traffic_estimate: number | null
+          updated_at: string
+        }
+        Insert: {
+          anchor_text?: string | null
+          context_snippet?: string | null
+          created_at?: string
+          discovered_at?: string
+          domain_authority?: number | null
+          id?: string
+          last_checked_at?: string
+          link_type?: string
+          notes?: string | null
+          page_title?: string | null
+          post_id?: string | null
+          relevance_score?: number | null
+          source_domain: string
+          source_url: string
+          spam_score?: number | null
+          status?: string
+          traffic_estimate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          anchor_text?: string | null
+          context_snippet?: string | null
+          created_at?: string
+          discovered_at?: string
+          domain_authority?: number | null
+          id?: string
+          last_checked_at?: string
+          link_type?: string
+          notes?: string | null
+          page_title?: string | null
+          post_id?: string | null
+          relevance_score?: number | null
+          source_domain?: string
+          source_url?: string
+          spam_score?: number | null
+          status?: string
+          traffic_estimate?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backlinks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
@@ -109,61 +239,166 @@ export type Database = {
       }
       posts: {
         Row: {
+          ai_overview_optimized: boolean | null
+          article_tags: string[] | null
           author_id: string | null
           category: string | null
           content: string | null
           created_at: string | null
           display_author_id: string | null
           excerpt: string | null
+          expert_reviewed: boolean | null
+          external_links_count: number | null
+          fact_checked: boolean | null
           featured: boolean | null
           featured_image: string | null
           featured_image_alt: string | null
+          featured_image_caption: string | null
+          featured_image_format: string | null
+          featured_image_height: number | null
+          featured_image_size_kb: number | null
+          featured_image_title: string | null
+          featured_image_width: number | null
+          featured_snippet_target: string | null
+          focus_keyword: string | null
+          geo_target_country: string | null
+          geo_target_language: string | null
+          geo_target_region: string | null
           id: string
+          internal_links_count: number | null
+          last_reviewed_at: string | null
+          linkedin_title: string | null
           meta_description: string | null
+          meta_keywords: string[] | null
           meta_title: string | null
+          people_also_ask: string[] | null
+          pinterest_description: string | null
           published_at: string | null
+          readability_score: number | null
+          review_count: number | null
+          review_rating: number | null
+          schema_type: string | null
+          secondary_keywords: string[] | null
+          seo_score: number | null
           slug: string
           status: string | null
           title: string
+          twitter_card_type: string | null
           updated_at: string | null
+          video_description: string | null
+          video_duration: string | null
+          video_thumbnail_url: string | null
+          video_upload_date: string | null
+          video_url: string | null
+          word_count: number | null
         }
         Insert: {
+          ai_overview_optimized?: boolean | null
+          article_tags?: string[] | null
           author_id?: string | null
           category?: string | null
           content?: string | null
           created_at?: string | null
           display_author_id?: string | null
           excerpt?: string | null
+          expert_reviewed?: boolean | null
+          external_links_count?: number | null
+          fact_checked?: boolean | null
           featured?: boolean | null
           featured_image?: string | null
           featured_image_alt?: string | null
+          featured_image_caption?: string | null
+          featured_image_format?: string | null
+          featured_image_height?: number | null
+          featured_image_size_kb?: number | null
+          featured_image_title?: string | null
+          featured_image_width?: number | null
+          featured_snippet_target?: string | null
+          focus_keyword?: string | null
+          geo_target_country?: string | null
+          geo_target_language?: string | null
+          geo_target_region?: string | null
           id?: string
+          internal_links_count?: number | null
+          last_reviewed_at?: string | null
+          linkedin_title?: string | null
           meta_description?: string | null
+          meta_keywords?: string[] | null
           meta_title?: string | null
+          people_also_ask?: string[] | null
+          pinterest_description?: string | null
           published_at?: string | null
+          readability_score?: number | null
+          review_count?: number | null
+          review_rating?: number | null
+          schema_type?: string | null
+          secondary_keywords?: string[] | null
+          seo_score?: number | null
           slug: string
           status?: string | null
           title: string
+          twitter_card_type?: string | null
           updated_at?: string | null
+          video_description?: string | null
+          video_duration?: string | null
+          video_thumbnail_url?: string | null
+          video_upload_date?: string | null
+          video_url?: string | null
+          word_count?: number | null
         }
         Update: {
+          ai_overview_optimized?: boolean | null
+          article_tags?: string[] | null
           author_id?: string | null
           category?: string | null
           content?: string | null
           created_at?: string | null
           display_author_id?: string | null
           excerpt?: string | null
+          expert_reviewed?: boolean | null
+          external_links_count?: number | null
+          fact_checked?: boolean | null
           featured?: boolean | null
           featured_image?: string | null
           featured_image_alt?: string | null
+          featured_image_caption?: string | null
+          featured_image_format?: string | null
+          featured_image_height?: number | null
+          featured_image_size_kb?: number | null
+          featured_image_title?: string | null
+          featured_image_width?: number | null
+          featured_snippet_target?: string | null
+          focus_keyword?: string | null
+          geo_target_country?: string | null
+          geo_target_language?: string | null
+          geo_target_region?: string | null
           id?: string
+          internal_links_count?: number | null
+          last_reviewed_at?: string | null
+          linkedin_title?: string | null
           meta_description?: string | null
+          meta_keywords?: string[] | null
           meta_title?: string | null
+          people_also_ask?: string[] | null
+          pinterest_description?: string | null
           published_at?: string | null
+          readability_score?: number | null
+          review_count?: number | null
+          review_rating?: number | null
+          schema_type?: string | null
+          secondary_keywords?: string[] | null
+          seo_score?: number | null
           slug?: string
           status?: string | null
           title?: string
+          twitter_card_type?: string | null
           updated_at?: string | null
+          video_description?: string | null
+          video_duration?: string | null
+          video_thumbnail_url?: string | null
+          video_upload_date?: string | null
+          video_url?: string | null
+          word_count?: number | null
         }
         Relationships: [
           {
@@ -277,11 +512,19 @@ export type Database = {
           created_at: string
           description: string
           featured: boolean | null
+          focus_keyword: string | null
+          geo_target_country: string | null
           id: string
           logo_url: string | null
+          meta_keywords: string[] | null
           name: string
           pricing_model: string | null
           published_at: string | null
+          schema_price_range: string | null
+          schema_rating: number | null
+          schema_review_count: number | null
+          secondary_keywords: string[] | null
+          seo_score: number | null
           slug: string
           status: string | null
           tagline: string
@@ -295,11 +538,19 @@ export type Database = {
           created_at?: string
           description: string
           featured?: boolean | null
+          focus_keyword?: string | null
+          geo_target_country?: string | null
           id?: string
           logo_url?: string | null
+          meta_keywords?: string[] | null
           name: string
           pricing_model?: string | null
           published_at?: string | null
+          schema_price_range?: string | null
+          schema_rating?: number | null
+          schema_review_count?: number | null
+          secondary_keywords?: string[] | null
+          seo_score?: number | null
           slug: string
           status?: string | null
           tagline: string
@@ -313,11 +564,19 @@ export type Database = {
           created_at?: string
           description?: string
           featured?: boolean | null
+          focus_keyword?: string | null
+          geo_target_country?: string | null
           id?: string
           logo_url?: string | null
+          meta_keywords?: string[] | null
           name?: string
           pricing_model?: string | null
           published_at?: string | null
+          schema_price_range?: string | null
+          schema_rating?: number | null
+          schema_review_count?: number | null
+          secondary_keywords?: string[] | null
+          seo_score?: number | null
           slug?: string
           status?: string | null
           tagline?: string

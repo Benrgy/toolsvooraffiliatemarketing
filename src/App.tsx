@@ -19,6 +19,7 @@ import PostEditor from "./pages/admin/PostEditor";
 import TopicalMap from "./pages/admin/TopicalMap";
 import Categories from "./pages/admin/Categories";
 import BulkSEO from "./pages/admin/BulkSEO";
+import Backlinks from "./pages/admin/Backlinks";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <BulkSEO />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/backlinks"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Backlinks />
               </ProtectedRoute>
             }
           />
