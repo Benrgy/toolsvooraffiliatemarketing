@@ -19,6 +19,7 @@ import { SEOAnalyzerPanel } from '@/components/admin/SEOAnalyzerPanel';
 import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
 import { RichSnippetPreview } from '@/components/admin/RichSnippetPreview';
 import { StructuredDataValidator } from '@/components/admin/StructuredDataValidator';
+import { KeywordResearchTool } from '@/components/admin/KeywordResearchTool';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -576,6 +577,11 @@ export default function PostEditor() {
 
           <TabsContent value="seo" className="space-y-6">
             <div className="space-y-6">
+              <KeywordResearchTool 
+                initialKeyword={focusKeyword}
+                onSelectKeyword={(keyword) => setFocusKeyword(keyword)}
+              />
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <Button

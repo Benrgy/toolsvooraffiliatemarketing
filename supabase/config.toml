@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.validate-structured-data]
 verify_jwt = true
+
+[functions.keyword-research]
+verify_jwt = true
