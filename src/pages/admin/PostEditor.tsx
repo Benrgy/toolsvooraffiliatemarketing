@@ -17,6 +17,7 @@ import { ArrowLeft, Save, Eye, Wand2, Sparkles, Globe, Video, Award } from 'luci
 import { ContentGenerationModal } from '@/components/admin/ContentGenerationModal';
 import { SEOAnalyzerPanel } from '@/components/admin/SEOAnalyzerPanel';
 import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
+import { RichSnippetPreview } from '@/components/admin/RichSnippetPreview';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -573,57 +574,73 @@ export default function PostEditor() {
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGenerateSEO}
-                  disabled={isGeneratingSEO || !title}
-                  className="w-full"
-                >
-                  <Sparkles className={cn("h-4 w-4 mr-2", isGeneratingSEO && "animate-spin")} />
-                  {isGeneratingSEO ? 'Genereren...' : 'Auto-genereer SEO metadata'}
-                </Button>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGenerateSEO}
+                    disabled={isGeneratingSEO || !title}
+                    className="w-full"
+                  >
+                    <Sparkles className={cn("h-4 w-4 mr-2", isGeneratingSEO && "animate-spin")} />
+                    {isGeneratingSEO ? 'Genereren...' : 'Auto-genereer SEO metadata'}
+                  </Button>
 
-                <div className="space-y-2">
-                  <Label htmlFor="metaTitle">Meta Titel</Label>
-                  <Input
-                    id="metaTitle"
-                    value={metaTitle}
-                    onChange={(e) => setMetaTitle(e.target.value)}
-                    placeholder="SEO titel..."
-                    maxLength={60}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {metaTitle.length}/60 karakters
-                  </p>
+                  <div className="space-y-2">
+                    <Label htmlFor="metaTitle">Meta Titel</Label>
+                    <Input
+                      id="metaTitle"
+                      value={metaTitle}
+                      onChange={(e) => setMetaTitle(e.target.value)}
+                      placeholder="SEO titel..."
+                      maxLength={60}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {metaTitle.length}/60 karakters
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="metaDescription">Meta Beschrijving</Label>
+                    <Textarea
+                      id="metaDescription"
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
+                      placeholder="SEO beschrijving..."
+                      rows={3}
+                      maxLength={160}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {metaDescription.length}/160 karakters
+                    </p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="metaDescription">Meta Beschrijving</Label>
-                  <Textarea
-                    id="metaDescription"
-                    value={metaDescription}
-                    onChange={(e) => setMetaDescription(e.target.value)}
-                    placeholder="SEO beschrijving..."
-                    rows={3}
-                    maxLength={160}
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    {metaDescription.length}/160 karakters
-                  </p>
-                </div>
+                <SEOAnalyzerPanel
+                  title={title}
+                  content={content}
+                  metaTitle={metaTitle}
+                  metaDescription={metaDescription}
+                  focusKeyword={focusKeyword}
+                  slug={slug}
+                  featuredImageAlt={featuredImageAlt}
+                />
               </div>
 
-              <SEOAnalyzerPanel
+              <RichSnippetPreview
                 title={title}
-                content={content}
                 metaTitle={metaTitle}
                 metaDescription={metaDescription}
-                focusKeyword={focusKeyword}
                 slug={slug}
-                featuredImageAlt={featuredImageAlt}
+                featuredImage={featuredImage}
+                videoUrl={videoUrl}
+                reviewRating={reviewRating}
+                reviewCount={reviewCount}
+                factChecked={factChecked}
+                expertReviewed={expertReviewed}
+                schemaType={schemaType}
               />
             </div>
           </TabsContent>
