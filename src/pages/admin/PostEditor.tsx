@@ -13,10 +13,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
-import { ArrowLeft, Save, Eye, Wand2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Wand2, Sparkles, Globe, Video, Award } from 'lucide-react';
 import { ContentGenerationModal } from '@/components/admin/ContentGenerationModal';
+import { SEOAnalyzerPanel } from '@/components/admin/SEOAnalyzerPanel';
+import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
+import { Badge } from '@/components/ui/badge';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Titel is verplicht').max(200, 'Titel te lang'),
@@ -47,6 +50,36 @@ export default function PostEditor() {
   const [metaDescription, setMetaDescription] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
   const [featuredImageAlt, setFeaturedImageAlt] = useState('');
+  const [featuredImageTitle, setFeaturedImageTitle] = useState('');
+  const [featuredImageCaption, setFeaturedImageCaption] = useState('');
+
+  // Advanced SEO fields
+  const [focusKeyword, setFocusKeyword] = useState('');
+  const [secondaryKeywords, setSecondaryKeywords] = useState<string[]>([]);
+  const [metaKeywords, setMetaKeywords] = useState<string[]>([]);
+  const [articleTags, setArticleTags] = useState<string[]>([]);
+  const [schemaType, setSchemaType] = useState('BlogPosting');
+  
+  // Geo-targeting
+  const [geoTargetCountry, setGeoTargetCountry] = useState('NL');
+  const [geoTargetLanguage, setGeoTargetLanguage] = useState('nl-NL');
+  
+  // Video schema
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoThumbnailUrl, setVideoThumbnailUrl] = useState('');
+  const [videoDuration, setVideoDuration] = useState('');
+  const [videoDescription, setVideoDescription] = useState('');
+  
+  // E-E-A-T signals
+  const [factChecked, setFactChecked] = useState(false);
+  const [expertReviewed, setExpertReviewed] = useState(false);
+  const [reviewRating, setReviewRating] = useState<number>();
+  const [reviewCount, setReviewCount] = useState<number>();
+
+  // Social media
+  const [twitterCardType, setTwitterCardType] = useState('summary_large_image');
+  const [pinterestDescription, setPinterestDescription] = useState('');
+  const [linkedinTitle, setLinkedinTitle] = useState('');
 
   // AI Generation states
   const [isGenerating, setIsGenerating] = useState(false);
@@ -94,6 +127,36 @@ export default function PostEditor() {
     setMetaDescription(data.meta_description || '');
     setFeaturedImage(data.featured_image || '');
     setFeaturedImageAlt(data.featured_image_alt || '');
+    setFeaturedImageTitle(data.featured_image_title || '');
+    setFeaturedImageCaption(data.featured_image_caption || '');
+    
+    // Advanced SEO
+    setFocusKeyword(data.focus_keyword || '');
+    setSecondaryKeywords(data.secondary_keywords || []);
+    setMetaKeywords(data.meta_keywords || []);
+    setArticleTags(data.article_tags || []);
+    setSchemaType(data.schema_type || 'BlogPosting');
+    
+    // Geo-targeting
+    setGeoTargetCountry(data.geo_target_country || 'NL');
+    setGeoTargetLanguage(data.geo_target_language || 'nl-NL');
+    
+    // Video
+    setVideoUrl(data.video_url || '');
+    setVideoThumbnailUrl(data.video_thumbnail_url || '');
+    setVideoDuration(data.video_duration || '');
+    setVideoDescription(data.video_description || '');
+    
+    // E-E-A-T
+    setFactChecked(data.fact_checked || false);
+    setExpertReviewed(data.expert_reviewed || false);
+    setReviewRating(data.review_rating);
+    setReviewCount(data.review_count);
+    
+    // Social
+    setTwitterCardType(data.twitter_card_type || 'summary_large_image');
+    setPinterestDescription(data.pinterest_description || '');
+    setLinkedinTitle(data.linkedin_title || '');
   };
 
   const generateSlug = (text: string) => {
@@ -224,6 +287,11 @@ export default function PostEditor() {
 
     setLoading(true);
 
+    // Calculate word count and links
+    const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
+    const internalLinks = (content.match(/\[.*?\]\(\/.*?\)/g) || []).length;
+    const externalLinks = (content.match(/\[.*?\]\(https?:\/\/.*?\)/g) || []).length;
+
     const postData = {
       title,
       slug,
@@ -234,8 +302,32 @@ export default function PostEditor() {
       featured,
       meta_title: metaTitle,
       meta_description: metaDescription,
+      meta_keywords: metaKeywords,
       featured_image: featuredImage,
       featured_image_alt: featuredImageAlt,
+      featured_image_title: featuredImageTitle,
+      featured_image_caption: featuredImageCaption,
+      focus_keyword: focusKeyword,
+      secondary_keywords: secondaryKeywords,
+      article_tags: articleTags,
+      schema_type: schemaType,
+      geo_target_country: geoTargetCountry,
+      geo_target_language: geoTargetLanguage,
+      video_url: videoUrl || null,
+      video_thumbnail_url: videoThumbnailUrl || null,
+      video_duration: videoDuration || null,
+      video_description: videoDescription || null,
+      video_upload_date: videoUrl ? new Date().toISOString() : null,
+      fact_checked: factChecked,
+      expert_reviewed: expertReviewed,
+      review_rating: reviewRating || null,
+      review_count: reviewCount || null,
+      twitter_card_type: twitterCardType,
+      pinterest_description: pinterestDescription || null,
+      linkedin_title: linkedinTitle || null,
+      word_count: wordCount,
+      internal_links_count: internalLinks,
+      external_links_count: externalLinks,
       author_id: user?.id,
       published_at: publish ? new Date().toISOString() : null,
     };
@@ -306,9 +398,12 @@ export default function PostEditor() {
         </div>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
+            <TabsTrigger value="advanced">Geavanceerd</TabsTrigger>
+            <TabsTrigger value="geo">Geo/Social</TabsTrigger>
+            <TabsTrigger value="eeat">E-E-A-T</TabsTrigger>
             <TabsTrigger value="settings">Instellingen</TabsTrigger>
           </TabsList>
 
