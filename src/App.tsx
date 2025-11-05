@@ -18,6 +18,7 @@ import Posts from "./pages/admin/Posts";
 import PostEditor from "./pages/admin/PostEditor";
 import TopicalMap from "./pages/admin/TopicalMap";
 import Categories from "./pages/admin/Categories";
+import BulkSEO from "./pages/admin/BulkSEO";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +87,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <Categories />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bulk-seo"
+            element={
+              <ProtectedRoute requireAdmin>
+                <BulkSEO />
               </ProtectedRoute>
             }
           />

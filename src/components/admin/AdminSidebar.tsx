@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Map, FolderOpen, LogOut, Home } from 'lucide-react';
+import { LayoutDashboard, FileText, Map, FolderOpen, LogOut, Home, Wand2 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -19,6 +19,7 @@ import { toast } from '@/hooks/use-toast';
 const menuItems = [
   { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Posts', url: '/admin/posts', icon: FileText },
+  { title: 'Bulk SEO', url: '/admin/bulk-seo', icon: Wand2 },
   { title: 'Topical Map', url: '/admin/topical-map', icon: Map },
   { title: 'Categorieën', url: '/admin/categories', icon: FolderOpen },
 ];
