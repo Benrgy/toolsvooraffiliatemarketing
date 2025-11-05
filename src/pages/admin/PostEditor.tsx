@@ -20,6 +20,7 @@ import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
 import { RichSnippetPreview } from '@/components/admin/RichSnippetPreview';
 import { StructuredDataValidator } from '@/components/admin/StructuredDataValidator';
 import { KeywordResearchTool } from '@/components/admin/KeywordResearchTool';
+import { InternalLinkingSuggestions } from '@/components/admin/InternalLinkingSuggestions';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -580,6 +581,13 @@ export default function PostEditor() {
               <KeywordResearchTool 
                 initialKeyword={focusKeyword}
                 onSelectKeyword={(keyword) => setFocusKeyword(keyword)}
+              />
+
+              <InternalLinkingSuggestions
+                content={content}
+                title={title}
+                focusKeyword={focusKeyword}
+                currentPostId={id}
               />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
