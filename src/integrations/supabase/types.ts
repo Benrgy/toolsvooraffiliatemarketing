@@ -202,6 +202,13 @@ export type Database = {
             foreignKeyName: "backlinks_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "post_analytics_summary"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "backlinks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
@@ -236,6 +243,87 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      post_analytics: {
+        Row: {
+          avg_time_on_page: number
+          backlinks_gained: number
+          bounce_rate: number | null
+          click_through_rate: number | null
+          comments_count: number
+          conversion_rate: number | null
+          conversions: number
+          created_at: string
+          date: string
+          domain_authority_score: number | null
+          id: string
+          keyword_rankings: Json | null
+          organic_traffic: number
+          page_views: number
+          post_id: string
+          scroll_depth: number | null
+          social_shares: number
+          unique_visitors: number
+          updated_at: string
+        }
+        Insert: {
+          avg_time_on_page?: number
+          backlinks_gained?: number
+          bounce_rate?: number | null
+          click_through_rate?: number | null
+          comments_count?: number
+          conversion_rate?: number | null
+          conversions?: number
+          created_at?: string
+          date?: string
+          domain_authority_score?: number | null
+          id?: string
+          keyword_rankings?: Json | null
+          organic_traffic?: number
+          page_views?: number
+          post_id: string
+          scroll_depth?: number | null
+          social_shares?: number
+          unique_visitors?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_time_on_page?: number
+          backlinks_gained?: number
+          bounce_rate?: number | null
+          click_through_rate?: number | null
+          comments_count?: number
+          conversion_rate?: number | null
+          conversions?: number
+          created_at?: string
+          date?: string
+          domain_authority_score?: number | null
+          id?: string
+          keyword_rankings?: Json | null
+          organic_traffic?: number
+          page_views?: number
+          post_id?: string
+          scroll_depth?: number | null
+          social_shares?: number
+          unique_visitors?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "post_analytics_summary"
+            referencedColumns: ["post_id"]
+          },
+          {
+            foreignKeyName: "post_analytics_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {
@@ -641,6 +729,26 @@ export type Database = {
           id?: string | null
           name?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      post_analytics_summary: {
+        Row: {
+          avg_bounce_rate: number | null
+          avg_conversion_rate: number | null
+          avg_scroll_depth: number | null
+          avg_time_on_page: number | null
+          days_tracked: number | null
+          post_id: string | null
+          published_at: string | null
+          slug: string | null
+          status: string | null
+          title: string | null
+          total_conversions: number | null
+          total_organic_traffic: number | null
+          total_shares: number | null
+          total_views: number | null
+          total_visitors: number | null
         }
         Relationships: []
       }

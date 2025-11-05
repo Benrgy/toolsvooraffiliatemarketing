@@ -20,6 +20,7 @@ import TopicalMap from "./pages/admin/TopicalMap";
 import Categories from "./pages/admin/Categories";
 import BulkSEO from "./pages/admin/BulkSEO";
 import Backlinks from "./pages/admin/Backlinks";
+import Performance from "./pages/admin/Performance";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <Backlinks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/performance"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Performance />
               </ProtectedRoute>
             }
           />
