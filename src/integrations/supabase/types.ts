@@ -244,6 +244,39 @@ export type Database = {
         }
         Relationships: []
       }
+      ga4_settings: {
+        Row: {
+          api_secret: string | null
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          measurement_id: string | null
+          property_id: string | null
+          sync_enabled: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          api_secret?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          measurement_id?: string | null
+          property_id?: string | null
+          sync_enabled?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          api_secret?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          measurement_id?: string | null
+          property_id?: string | null
+          sync_enabled?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_analytics: {
         Row: {
           avg_time_on_page: number

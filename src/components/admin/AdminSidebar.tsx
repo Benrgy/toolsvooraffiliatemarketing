@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Map, FolderOpen, LogOut, Home, Wand2, TrendingUp, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, FileText, Map, FolderOpen, LogOut, Home, Wand2, TrendingUp, BarChart3, Settings } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -24,6 +24,7 @@ const menuItems = [
   { title: 'Backlinks', url: '/admin/backlinks', icon: TrendingUp },
   { title: 'Topical Map', url: '/admin/topical-map', icon: Map },
   { title: 'Categorieën', url: '/admin/categories', icon: FolderOpen },
+  { title: 'Instellingen', url: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar() {

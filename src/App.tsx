@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { usePageTracking } from "@/hooks/usePageTracking";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
@@ -21,8 +22,14 @@ import Categories from "./pages/admin/Categories";
 import BulkSEO from "./pages/admin/BulkSEO";
 import Backlinks from "./pages/admin/Backlinks";
 import Performance from "./pages/admin/Performance";
+import Settings from "./pages/admin/Settings";
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  usePageTracking();
+  return null;
+};
 
 const App = () => (
   <HelmetProvider>
@@ -36,6 +43,7 @@ const App = () => (
             v7_relativeSplatPath: true,
           }}
         >
+        <AppContent />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/tools" element={<Tools />} />
@@ -113,6 +121,14 @@ const App = () => (
             element={
               <ProtectedRoute requireAdmin>
                 <Performance />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute requireAdmin>
+                <Settings />
               </ProtectedRoute>
             }
           />
