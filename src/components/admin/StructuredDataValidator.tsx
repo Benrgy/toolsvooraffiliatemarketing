@@ -1,317 +1,205 @@
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CheckCircle2, XCircle, AlertTriangle, Code } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle2, AlertCircle, AlertTriangle, Info, RefreshCw, Code } from 'lucide-react';
-import { cn } from '@/lib/utils';
-
-interface ValidationIssue {
-  type: 'error' | 'warning' | 'info';
-  field: string;
-  message: string;
-  path?: string;
-}
 
 interface ValidationResult {
   valid: boolean;
-  schemaType: string;
-  issues: ValidationIssue[];
-  score: number;
-}
-
-interface StructuredDataValidatorProps {
-  title: string;
-  content: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  featuredImage?: string;
-  featuredImageAlt?: string;
-  videoUrl?: string;
-  videoThumbnailUrl?: string;
-  videoDuration?: string;
-  videoDescription?: string;
-  reviewRating?: number;
-  reviewCount?: number;
-  factChecked?: boolean;
-  expertReviewed?: boolean;
-  schemaType?: string;
-  slug: string;
-}
-
-export const StructuredDataValidator = (props: StructuredDataValidatorProps) => {
-  const [validating, setValidating] = useState(false);
-  const [result, setResult] = useState<ValidationResult | null>(null);
-  const [schema, setSchema] = useState<any>(null);
-
-  const generateSchema = () => {
-    const baseUrl = 'https://beginnenmetaffiliate.nl';
-    
-    const blogSchema = {
-      '@context': 'https://schema.org',
-      '@type': props.schemaType || 'BlogPosting',
-      headline: props.metaTitle || props.title,
-      description: props.metaDescription,
-      image: props.featuredImage ? [props.featuredImage] : [],
-      datePublished: new Date().toISOString(),
-      dateModified: new Date().toISOString(),
-      author: {
-        '@type': 'Person',
-        name: 'Admin',
-        url: baseUrl
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'Beginnen met Affiliate',
-        logo: {
-          '@type': 'ImageObject',
-          url: `${baseUrl}/logo.png`
-        }
-      },
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${baseUrl}/blog/${props.slug}`
-      }
-    };
-
-    return blogSchema;
+  errors: string[];
+  warnings: string[];
+  suggestions: string[];
+  metadata: {
+    validatedAt: string;
+    schemaType: string;
   };
+}
+
+export const StructuredDataValidator = () => {
+  const [structuredData, setStructuredData] = useState('');
+  const [result, setResult] = useState<ValidationResult | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleValidate = async () => {
-    setValidating(true);
-    setResult(null);
+    if (!structuredData.trim()) {
+      toast({
+        title: 'Structured data vereist',
+        description: 'Voer structured data in om te valideren.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
+    setLoading(true);
     try {
-      const generatedSchema = generateSchema();
-      setSchema(generatedSchema);
-
       const { data, error } = await supabase.functions.invoke('validate-structured-data', {
-        body: { schema: generatedSchema }
+        body: { structuredData: structuredData.trim() }
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Rate limit')) {
+          toast({
+            title: 'Rate limit bereikt',
+            description: 'Te veel verzoeken. Probeer het later opnieuw.',
+            variant: 'destructive',
+          });
+        } else if (error.message.includes('Payment required')) {
+          toast({
+            title: 'Onvoldoende credits',
+            description: 'Voeg credits toe aan je Lovable AI workspace.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       setResult(data);
-
-      if (data.valid) {
-        toast({
-          title: 'Schema is valide! ✅',
-          description: `Score: ${data.score}/100`,
-        });
-      } else {
-        toast({
-          title: 'Schema bevat fouten',
-          description: `${data.issues.filter((i: ValidationIssue) => i.type === 'error').length} error(s) gevonden`,
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
-      console.error('Validation error:', error);
       toast({
-        title: 'Validatie mislukt',
-        description: error instanceof Error ? error.message : 'Er is een fout opgetreden',
+        title: 'Validatie voltooid',
+        description: data.valid ? 'Structured data is valide!' : 'Er zijn problemen gevonden.',
+        variant: data.valid ? 'default' : 'destructive',
+      });
+    } catch (error) {
+      console.error('Error validating structured data:', error);
+      toast({
+        title: 'Fout bij validatie',
+        description: 'Er is iets misgegaan. Probeer het opnieuw.',
         variant: 'destructive',
       });
     } finally {
-      setValidating(false);
+      setLoading(false);
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-success';
-    if (score >= 70) return 'text-warning';
-    return 'text-destructive';
-  };
-
-  const getScoreBadge = (score: number) => {
-    if (score >= 90) return 'default';
-    if (score >= 70) return 'secondary';
-    return 'destructive';
-  };
-
-  const getIssueIcon = (type: string) => {
-    switch (type) {
-      case 'error':
-        return <AlertCircle className="h-4 w-4 text-destructive" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-warning" />;
-      case 'info':
-        return <Info className="h-4 w-4 text-blue-500" />;
-      default:
-        return null;
-    }
+  const loadExample = () => {
+    const example = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "De Ultieme Gids voor SEO in 2024",
+      "image": "https://example.com/image.jpg",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Jansen"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Mijn Website",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://example.com/logo.jpg"
+        }
+      },
+      "datePublished": "2024-01-01",
+      "dateModified": "2024-01-15"
+    };
+    setStructuredData(JSON.stringify(example, null, 2));
   };
 
   return (
-    <Card className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Structured Data Validator</h3>
-          <p className="text-sm text-muted-foreground">
-            Test je JSON-LD schema volgens Google's richtlijnen
-          </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Structured Data Validator</h3>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={loadExample}>
+            <Code className="h-4 w-4 mr-2" />
+            Laad Voorbeeld
+          </Button>
+          <Button onClick={handleValidate} disabled={loading}>
+            {loading ? 'Valideren...' : 'Valideer Schema'}
+          </Button>
         </div>
-        <Button onClick={handleValidate} disabled={validating}>
-          <RefreshCw className={cn("h-4 w-4 mr-2", validating && "animate-spin")} />
-          {validating ? 'Valideren...' : 'Valideer Schema'}
-        </Button>
       </div>
 
+      <Textarea
+        placeholder="Plak hier je Schema.org JSON-LD structured data..."
+        value={structuredData}
+        onChange={(e) => setStructuredData(e.target.value)}
+        rows={12}
+        className="font-mono text-sm"
+      />
+
       {result && (
-        <Tabs defaultValue="results" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="results">Resultaten</TabsTrigger>
-            <TabsTrigger value="schema">Schema Code</TabsTrigger>
-          </TabsList>
+        <div className="space-y-4">
+          <Card className="p-4">
+            <div className="flex items-center gap-3 mb-4">
+              {result.valid ? (
+                <>
+                  <CheckCircle2 className="h-6 w-6 text-green-500" />
+                  <div>
+                    <h4 className="font-semibold">Structured Data is Valide</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Schema Type: {result.metadata.schemaType}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-6 w-6 text-red-500" />
+                  <div>
+                    <h4 className="font-semibold">Problemen Gevonden</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {result.errors.length} errors, {result.warnings.length} warnings
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
 
-          <TabsContent value="results" className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-              <div className="flex items-center gap-3">
-                {result.valid ? (
-                  <CheckCircle2 className="h-8 w-8 text-success" />
-                ) : (
-                  <AlertCircle className="h-8 w-8 text-destructive" />
-                )}
-                <div>
-                  <p className="font-semibold">
-                    {result.valid ? 'Schema is valide!' : 'Schema bevat fouten'}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Type: {result.schemaType}
-                  </p>
+            {result.errors.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-red-600 font-medium">
+                  <XCircle className="h-4 w-4" />
+                  <span>Errors</span>
                 </div>
+                {result.errors.map((error, index) => (
+                  <Alert key={index} variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                ))}
               </div>
-              <Badge variant={getScoreBadge(result.score)} className="text-lg px-4 py-2">
-                {result.score}/100
-              </Badge>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">Validatie Score</span>
-                <span className={cn("font-bold", getScoreColor(result.score))}>
-                  {result.score}%
-                </span>
+            {result.warnings.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2 text-yellow-600 font-medium">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span>Warnings</span>
+                </div>
+                {result.warnings.map((warning, index) => (
+                  <Alert key={index}>
+                    <AlertDescription>{warning}</AlertDescription>
+                  </Alert>
+                ))}
               </div>
-              <Progress value={result.score} className="h-2" />
-            </div>
+            )}
 
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950">
-                <p className="text-2xl font-bold text-red-600">
-                  {result.issues.filter(i => i.type === 'error').length}
-                </p>
-                <p className="text-sm text-red-600">Errors</p>
-              </div>
-              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950">
-                <p className="text-2xl font-bold text-yellow-600">
-                  {result.issues.filter(i => i.type === 'warning').length}
-                </p>
-                <p className="text-sm text-yellow-600">Warnings</p>
-              </div>
-              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950">
-                <p className="text-2xl font-bold text-blue-600">
-                  {result.issues.filter(i => i.type === 'info').length}
-                </p>
-                <p className="text-sm text-blue-600">Info</p>
-              </div>
-            </div>
-
-            {result.issues.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="font-semibold text-sm">Issues</h4>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {result.issues.map((issue, index) => (
-                    <Alert key={index} variant={issue.type === 'error' ? 'destructive' : 'default'}>
-                      {getIssueIcon(issue.type)}
-                      <AlertDescription>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
-                            <span className="font-medium">{issue.field}:</span> {issue.message}
-                          </div>
-                          <Badge variant="outline" className="text-xs shrink-0">
-                            {issue.type}
-                          </Badge>
-                        </div>
-                      </AlertDescription>
-                    </Alert>
+            {result.suggestions.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Suggesties voor Verbetering</span>
+                </div>
+                <div className="space-y-2">
+                  {result.suggestions.map((suggestion, index) => (
+                    <div key={index} className="flex items-start gap-2 text-sm">
+                      <Badge variant="outline" className="mt-0.5">
+                        {index + 1}
+                      </Badge>
+                      <span>{suggestion}</span>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
-
-            {result.valid && (
-              <Alert>
-                <CheckCircle2 className="h-4 w-4 text-success" />
-                <AlertDescription>
-                  <p className="font-medium">Perfect! Je schema is volledig valide.</p>
-                  <ul className="text-sm mt-2 space-y-1">
-                    <li>✓ Alle verplichte velden zijn aanwezig</li>
-                    <li>✓ Schema volgt Google's richtlijnen</li>
-                    <li>✓ Klaar voor gebruik in productie</li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-          </TabsContent>
-
-          <TabsContent value="schema" className="space-y-4">
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Code className="h-4 w-4" />
-                  <span className="text-sm font-medium">JSON-LD Schema</span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
-                    toast({ title: 'Schema gekopieerd!' });
-                  }}
-                >
-                  Kopieer
-                </Button>
-              </div>
-              <pre className="text-xs overflow-x-auto max-h-96 p-4 bg-background rounded border">
-                {JSON.stringify(schema, null, 2)}
-              </pre>
-            </div>
-
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                <p className="font-medium">Test met Google's Rich Results Test</p>
-                <p className="text-sm mt-1">
-                  Kopieer deze code en test het op:{' '}
-                  <a
-                    href="https://search.google.com/test/rich-results"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    Google Rich Results Test
-                  </a>
-                </p>
-              </AlertDescription>
-            </Alert>
-          </TabsContent>
-        </Tabs>
+          </Card>
+        </div>
       )}
-
-      {!result && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Klik op "Valideer Schema" om je structured data te testen volgens Google's richtlijnen.
-            De validator controleert op verplichte velden, aanbevolen eigenschappen, en schema.org compliance.
-          </AlertDescription>
-        </Alert>
-      )}
-    </Card>
+    </div>
   );
 };

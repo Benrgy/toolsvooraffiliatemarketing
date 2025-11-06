@@ -1,12 +1,11 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, TrendingUp, Target, Eye, Loader2, AlertCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Search, TrendingUp, Target, Lightbulb } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface KeywordSuggestion {
   keyword: string;
@@ -16,205 +15,136 @@ interface KeywordSuggestion {
   relevanceScore: number;
 }
 
-interface KeywordResearchToolProps {
-  initialKeyword?: string;
-  onSelectKeyword?: (keyword: string) => void;
-}
-
-export const KeywordResearchTool = ({ initialKeyword = '', onSelectKeyword }: KeywordResearchToolProps) => {
-  const [keyword, setKeyword] = useState(initialKeyword);
+export const KeywordResearchTool = () => {
+  const [focusKeyword, setFocusKeyword] = useState('');
+  const [keywords, setKeywords] = useState<KeywordSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<KeywordSuggestion[]>([]);
-  const [disclaimer, setDisclaimer] = useState('');
-  const { toast } = useToast();
-
-  const getDifficultyColor = (difficulty: number) => {
-    if (difficulty < 30) return "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20";
-    if (difficulty < 60) return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20";
-    return "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20";
-  };
-
-  const getDifficultyLabel = (difficulty: number) => {
-    if (difficulty < 30) return "Makkelijk";
-    if (difficulty < 60) return "Gemiddeld";
-    return "Moeilijk";
-  };
-
-  const getIntentIcon = (intent: string) => {
-    switch (intent) {
-      case 'informational': return <Eye className="h-4 w-4" />;
-      case 'commercial': return <TrendingUp className="h-4 w-4" />;
-      case 'transactional': return <Target className="h-4 w-4" />;
-      default: return <Search className="h-4 w-4" />;
-    }
-  };
-
-  const getIntentLabel = (intent: string) => {
-    const labels: Record<string, string> = {
-      informational: 'Informatie',
-      commercial: 'Commercieel',
-      transactional: 'Transactie',
-      navigational: 'Navigatie'
-    };
-    return labels[intent] || intent;
-  };
-
-  const formatVolume = (volume: number) => {
-    if (volume >= 1000) return `${(volume / 1000).toFixed(1)}k`;
-    return volume.toString();
-  };
 
   const handleResearch = async () => {
-    if (!keyword.trim()) {
+    if (!focusKeyword.trim()) {
       toast({
-        title: "Keyword vereist",
-        description: "Voer een focus keyword in om te analyseren",
-        variant: "destructive",
+        title: 'Focus keyword vereist',
+        description: 'Voer een focus keyword in om te zoeken.',
+        variant: 'destructive',
       });
       return;
     }
 
     setLoading(true);
-    setResults([]);
-
     try {
       const { data, error } = await supabase.functions.invoke('keyword-research', {
-        body: { focusKeyword: keyword.trim(), country: 'NL', language: 'nl' }
+        body: { focusKeyword: focusKeyword.trim() }
       });
 
-      if (error) throw error;
-
-      if (data.error) {
-        throw new Error(data.error);
+      if (error) {
+        if (error.message.includes('Rate limit')) {
+          toast({
+            title: 'Rate limit bereikt',
+            description: 'Te veel verzoeken. Probeer het later opnieuw.',
+            variant: 'destructive',
+          });
+        } else if (error.message.includes('Payment required')) {
+          toast({
+            title: 'Onvoldoende credits',
+            description: 'Voeg credits toe aan je Lovable AI workspace.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
       }
 
-      setResults(data.keywords || []);
-      setDisclaimer(data.metadata?.disclaimer || '');
-
+      setKeywords(data.keywords);
       toast({
-        title: "Keyword research voltooid",
-        description: `${data.keywords?.length || 0} keyword suggesties gevonden`,
+        title: 'Keyword research voltooid',
+        description: `${data.keywords.length} keywords gevonden.`,
       });
-
-    } catch (error: any) {
-      console.error('Keyword research error:', error);
+    } catch (error) {
+      console.error('Error researching keywords:', error);
       toast({
-        title: "Keyword research mislukt",
-        description: error.message || "Er is een fout opgetreden bij het ophalen van keyword suggesties",
-        variant: "destructive",
+        title: 'Fout bij keyword research',
+        description: 'Er is iets misgegaan. Probeer het opnieuw.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeywordClick = (selectedKeyword: string) => {
-    if (onSelectKeyword) {
-      onSelectKeyword(selectedKeyword);
-      toast({
-        title: "Keyword geselecteerd",
-        description: `"${selectedKeyword}" is ingesteld als focus keyword`,
-      });
+  const getDifficultyColor = (difficulty: number) => {
+    if (difficulty < 30) return 'bg-green-500';
+    if (difficulty < 60) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
+  const getIntentIcon = (intent: string) => {
+    switch (intent) {
+      case 'informational': return <Lightbulb className="h-4 w-4" />;
+      case 'commercial': return <TrendingUp className="h-4 w-4" />;
+      case 'transactional': return <Target className="h-4 w-4" />;
+      default: return <Search className="h-4 w-4" />;
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Search className="h-5 w-5" />
-          Keyword Research Tool
-        </CardTitle>
-        <CardDescription>
-          Ontdek gerelateerde keywords met search volume en difficulty data
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Input
-            placeholder="Voer een focus keyword in..."
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleResearch()}
-            disabled={loading}
-          />
-          <Button onClick={handleResearch} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analyseren...
-              </>
-            ) : (
-              <>
-                <Search className="h-4 w-4 mr-2" />
-                Analyseer
-              </>
-            )}
-          </Button>
-        </div>
+    <div className="space-y-6">
+      <div className="flex gap-4">
+        <Input
+          placeholder="Focus keyword..."
+          value={focusKeyword}
+          onChange={(e) => setFocusKeyword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleResearch()}
+        />
+        <Button onClick={handleResearch} disabled={loading}>
+          <Search className="h-4 w-4 mr-2" />
+          {loading ? 'Zoeken...' : 'Zoek Keywords'}
+        </Button>
+      </div>
 
-        {disclaimer && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-xs">{disclaimer}</AlertDescription>
-          </Alert>
-        )}
+      {keywords.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">{keywords.length} Keyword Suggesties</h3>
+            <p className="text-sm text-muted-foreground">
+              Geschat zoekvolume en difficulty scores
+            </p>
+          </div>
 
-        {results.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-semibold text-sm">Keyword Suggesties ({results.length})</h3>
-            <div className="grid gap-2 max-h-[500px] overflow-y-auto">
-              {results.map((result, index) => (
-                <Card 
-                  key={index}
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => handleKeywordClick(result.keyword)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium">{result.keyword}</span>
-                          <Badge variant="outline" className="gap-1">
-                            {getIntentIcon(result.intent)}
-                            <span className="text-xs">{getIntentLabel(result.intent)}</span>
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <TrendingUp className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">Volume:</span>
-                            <span className="font-medium">{formatVolume(result.searchVolume)}/mo</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-1">
-                            <Target className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-muted-foreground">Relevantie:</span>
-                            <span className="font-medium">{result.relevanceScore}%</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Badge className={getDifficultyColor(result.difficulty)}>
-                        {getDifficultyLabel(result.difficulty)} ({result.difficulty})
+          <div className="grid gap-3">
+            {keywords.map((kw, index) => (
+              <Card key={index} className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-3">
+                      <h4 className="font-medium">{kw.keyword}</h4>
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {getIntentIcon(kw.intent)}
+                        <span className="capitalize">{kw.intent}</span>
                       </Badge>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    
+                    <div className="flex gap-6 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        <span>{kw.searchVolume.toLocaleString()} zoekvolume/maand</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-2 w-2 rounded-full ${getDifficultyColor(kw.difficulty)}`} />
+                        <span>Difficulty: {kw.difficulty}/100</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        <span>Relevantie: {kw.relevanceScore}/100</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-        )}
-
-        {!loading && results.length === 0 && keyword && (
-          <Alert>
-            <AlertDescription>
-              Geen resultaten gevonden. Probeer een ander keyword.
-            </AlertDescription>
-          </Alert>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };

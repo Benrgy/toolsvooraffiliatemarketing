@@ -1,28 +1,10 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-interface InternalLink {
-  postId: string;
-  title: string;
-  slug: string;
-  relevanceScore: number;
-  suggestedAnchorText: string;
-  context: string;
-}
-
-interface ExternalLink {
-  url: string;
-  title: string;
-  relevanceScore: number;
-  suggestedQuote: string;
-  category: string;
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -30,160 +12,156 @@ serve(async (req) => {
   }
 
   try {
-    const { content, title, focusKeyword, excludePostId } = await req.json();
+    const { postId, content, title } = await req.json();
 
-    if (!content || !title) {
-      return new Response(
-        JSON.stringify({ error: 'Content and title are required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch published posts for internal linking
-    let query = supabase
+    // Get all published posts except the current one
+    const { data: posts, error: postsError } = await supabase
       .from('posts')
-      .select('id, title, slug, excerpt, content, focus_keyword, secondary_keywords')
+      .select('id, title, slug, excerpt, content, focus_keyword')
       .eq('status', 'published')
-      .limit(50);
-
-    if (excludePostId) {
-      query = query.neq('id', excludePostId);
-    }
-
-    const { data: posts, error: postsError } = await query;
+      .neq('id', postId || '00000000-0000-0000-0000-000000000000');
 
     if (postsError) {
       console.error('Error fetching posts:', postsError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch posts' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw postsError;
     }
 
-    // Use Lovable AI to analyze content and suggest links
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) {
-      return new Response(
-        JSON.stringify({ error: 'AI service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `Je bent een SEO specialist die gespecialiseerd is in internal en external linking strategieën.
-    
-Analyseer de gegeven content en stel relevante interne en externe links voor.
+    const prompt = `Analyseer de volgende content en suggereer relevante interne links naar andere posts.
 
-Voor interne links:
-- Identificeer relevante bestaande posts die gerelateerd zijn aan de content
-- Stel natuurlijke anchor text voor die past in de context
-- Geef een relevance score (0-100)
-- Geef context waar de link het beste past
+HUIDIGE POST:
+Titel: ${title}
+Content preview: ${content.substring(0, 1000)}...
 
-Voor externe links:
-- Stel 5-7 autoritaire externe bronnen voor die relevant zijn voor het onderwerp
-- Kies betrouwbare bronnen zoals overheidswebsites, academische publicaties, bekende nieuwsbronnen, of industrie experts
-- Genereer een kort citaat/quote (1-2 zinnen) dat gebruikt kan worden als referentie
-- Geef een relevance score (0-100)
-- Categoriseer het type bron (Research, Statistics, Guide, News, Tool, etc.)
+BESCHIKBARE POSTS OM NAAR TE LINKEN:
+${posts.map((p, i) => `${i + 1}. "${p.title}" (slug: ${p.slug})
+   Focus keyword: ${p.focus_keyword || 'N/A'}
+   Excerpt: ${p.excerpt || 'N/A'}`).join('\n\n')}
 
-Retourneer ALLEEN een JSON object zonder extra tekst of markdown formatting.`;
+Geef 3-7 suggesties voor interne links met:
+1. De anchor text (specifieke woorden uit de content die gelinkt moeten worden)
+2. De target post slug
+3. Context (waar in de tekst het zou moeten komen)
+4. Relevance score (0-100)
+5. Reasoning (waarom is deze link relevant)
 
-    const postsContext = posts?.map(p => ({
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      excerpt: p.excerpt,
-      focusKeyword: p.focus_keyword,
-      secondaryKeywords: p.secondary_keywords
-    })) || [];
+Zorg dat:
+- Anchor text natuurlijk is en geen "klik hier" bevat
+- Links contextually relevant zijn
+- Je verschillende delen van de content spreidt
+- Je de meest relevante posts prioriteert`;
 
-    const userPrompt = `Content titel: ${title}
-Focus keyword: ${focusKeyword || 'niet opgegeven'}
-
-Content (eerste 2000 karakters):
-${content.substring(0, 2000)}
-
-Beschikbare posts voor interne links:
-${JSON.stringify(postsContext, null, 2)}
-
-Genereer suggesties in dit JSON formaat:
-{
-  "internalLinks": [
-    {
-      "postId": "uuid",
-      "title": "Post titel",
-      "slug": "post-slug",
-      "relevanceScore": 85,
-      "suggestedAnchorText": "natuurlijke anchor text",
-      "context": "Korte uitleg waarom deze link relevant is"
-    }
-  ],
-  "externalLinks": [
-    {
-      "url": "https://example.com/artikel",
-      "title": "Titel van de externe bron",
-      "relevanceScore": 90,
-      "suggestedQuote": "Een relevant citaat of feit van deze bron dat je kunt gebruiken.",
-      "category": "Research"
-    }
-  ]
-}`;
-
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
         messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          {
+            role: 'system',
+            content: 'Je bent een SEO expert gespecialiseerd in internal linking strategieën. Geef natuurlijke, contextueel relevante link suggesties.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
         ],
-        temperature: 0.7,
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'suggest_internal_links',
+              description: 'Return internal linking suggestions',
+              parameters: {
+                type: 'object',
+                properties: {
+                  suggestions: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        anchorText: { type: 'string' },
+                        targetSlug: { type: 'string' },
+                        context: { type: 'string' },
+                        relevanceScore: { type: 'number' },
+                        reasoning: { type: 'string' }
+                      },
+                      required: ['anchorText', 'targetSlug', 'context', 'relevanceScore', 'reasoning']
+                    }
+                  }
+                },
+                required: ['suggestions']
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'suggest_internal_links' } }
       }),
     });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI API error:', aiResponse.status, errorText);
-      return new Response(
-        JSON.stringify({ error: 'Failed to generate link suggestions' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required. Please add credits to your Lovable AI workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const errorText = await response.text();
+      console.error('AI API error:', response.status, errorText);
+      throw new Error(`AI API error: ${response.status}`);
     }
 
-    const aiData = await aiResponse.json();
-    const aiContent = aiData.choices[0].message.content;
-
-    // Parse AI response
-    let suggestions;
-    try {
-      // Remove markdown code blocks if present
-      const cleanContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      suggestions = JSON.parse(cleanContent);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', aiContent);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to parse suggestions',
-          internalLinks: [],
-          externalLinks: []
-        }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const data = await response.json();
+    const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+    
+    if (!toolCall) {
+      throw new Error('No tool call in response');
     }
+
+    const result = JSON.parse(toolCall.function.arguments);
+    
+    // Enrich suggestions with full post data
+    const enrichedSuggestions = result.suggestions.map((suggestion: any) => {
+      const targetPost = posts.find(p => p.slug === suggestion.targetSlug);
+      return {
+        ...suggestion,
+        targetPost: targetPost ? {
+          title: targetPost.title,
+          slug: targetPost.slug,
+          excerpt: targetPost.excerpt
+        } : null
+      };
+    }).filter((s: any) => s.targetPost !== null);
+
+    // Sort by relevance
+    enrichedSuggestions.sort((a: any, b: any) => b.relevanceScore - a.relevanceScore);
 
     return new Response(
       JSON.stringify({
-        internalLinks: suggestions.internalLinks || [],
-        externalLinks: suggestions.externalLinks || [],
+        suggestions: enrichedSuggestions,
+        metadata: {
+          totalSuggestions: enrichedSuggestions.length,
+          availablePosts: posts.length,
+          generatedAt: new Date().toISOString()
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

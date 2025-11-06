@@ -5,269 +5,147 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface ValidationIssue {
-  type: 'error' | 'warning' | 'info';
-  field: string;
-  message: string;
-  path?: string;
-}
-
-interface ValidationResult {
-  valid: boolean;
-  schemaType: string;
-  issues: ValidationIssue[];
-  score: number;
-}
-
-function validateBlogPosting(schema: any): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-
-  // Required fields
-  if (!schema.headline) {
-    issues.push({ type: 'error', field: 'headline', message: 'Headline is verplicht voor BlogPosting' });
-  } else if (schema.headline.length > 110) {
-    issues.push({ type: 'warning', field: 'headline', message: 'Headline is te lang (max 110 karakters)' });
-  }
-
-  if (!schema.image || (Array.isArray(schema.image) && schema.image.length === 0)) {
-    issues.push({ type: 'error', field: 'image', message: 'Minimaal 1 afbeelding is verplicht' });
-  } else {
-    const images = Array.isArray(schema.image) ? schema.image : [schema.image];
-    images.forEach((img: string, i: number) => {
-      if (!img.startsWith('http')) {
-        issues.push({ type: 'error', field: 'image', message: `Afbeelding ${i + 1} moet een volledige URL zijn` });
-      }
-    });
-  }
-
-  if (!schema.datePublished) {
-    issues.push({ type: 'error', field: 'datePublished', message: 'Publicatiedatum is verplicht' });
-  }
-
-  if (!schema.dateModified) {
-    issues.push({ type: 'warning', field: 'dateModified', message: 'Laatste wijzigingsdatum wordt aanbevolen' });
-  }
-
-  if (!schema.author) {
-    issues.push({ type: 'error', field: 'author', message: 'Auteur informatie is verplicht' });
-  } else {
-    if (!schema.author.name) {
-      issues.push({ type: 'error', field: 'author.name', message: 'Auteur naam is verplicht' });
-    }
-    if (!schema.author.url && !schema.author.sameAs) {
-      issues.push({ type: 'warning', field: 'author', message: 'Auteur URL of sameAs wordt aanbevolen voor E-E-A-T' });
-    }
-  }
-
-  if (!schema.publisher) {
-    issues.push({ type: 'error', field: 'publisher', message: 'Publisher is verplicht' });
-  } else {
-    if (!schema.publisher.name) {
-      issues.push({ type: 'error', field: 'publisher.name', message: 'Publisher naam is verplicht' });
-    }
-    if (!schema.publisher.logo) {
-      issues.push({ type: 'error', field: 'publisher.logo', message: 'Publisher logo is verplicht' });
-    }
-  }
-
-  // Recommended fields
-  if (!schema.description) {
-    issues.push({ type: 'warning', field: 'description', message: 'Beschrijving wordt sterk aanbevolen' });
-  }
-
-  if (!schema.mainEntityOfPage) {
-    issues.push({ type: 'info', field: 'mainEntityOfPage', message: 'mainEntityOfPage helpt Google de pagina beter te begrijpen' });
-  }
-
-  return issues;
-}
-
-function validateArticle(schema: any): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-
-  // Similar to BlogPosting but with different requirements
-  if (!schema.headline) {
-    issues.push({ type: 'error', field: 'headline', message: 'Headline is verplicht voor Article' });
-  }
-
-  if (!schema.image) {
-    issues.push({ type: 'error', field: 'image', message: 'Afbeelding is verplicht' });
-  }
-
-  if (!schema.datePublished) {
-    issues.push({ type: 'error', field: 'datePublished', message: 'Publicatiedatum is verplicht' });
-  }
-
-  if (!schema.author) {
-    issues.push({ type: 'error', field: 'author', message: 'Auteur is verplicht' });
-  }
-
-  return issues;
-}
-
-function validateVideoObject(schema: any): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-
-  if (!schema.name) {
-    issues.push({ type: 'error', field: 'name', message: 'Video naam is verplicht' });
-  }
-
-  if (!schema.description) {
-    issues.push({ type: 'error', field: 'description', message: 'Video beschrijving is verplicht' });
-  }
-
-  if (!schema.thumbnailUrl) {
-    issues.push({ type: 'error', field: 'thumbnailUrl', message: 'Thumbnail URL is verplicht' });
-  } else if (Array.isArray(schema.thumbnailUrl)) {
-    if (schema.thumbnailUrl.length === 0) {
-      issues.push({ type: 'error', field: 'thumbnailUrl', message: 'Minimaal 1 thumbnail is verplicht' });
-    }
-  }
-
-  if (!schema.uploadDate) {
-    issues.push({ type: 'error', field: 'uploadDate', message: 'Upload datum is verplicht' });
-  }
-
-  if (!schema.contentUrl && !schema.embedUrl) {
-    issues.push({ type: 'error', field: 'contentUrl/embedUrl', message: 'contentUrl of embedUrl is verplicht' });
-  }
-
-  if (schema.duration) {
-    if (!schema.duration.match(/^PT(?:\d+H)?(?:\d+M)?(?:\d+S)?$/)) {
-      issues.push({ type: 'error', field: 'duration', message: 'Duration moet in ISO 8601 format (PT1H30M)' });
-    }
-  }
-
-  return issues;
-}
-
-function validateReview(schema: any): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-
-  if (!schema.reviewRating) {
-    issues.push({ type: 'error', field: 'reviewRating', message: 'Review rating is verplicht' });
-  } else {
-    if (!schema.reviewRating.ratingValue) {
-      issues.push({ type: 'error', field: 'reviewRating.ratingValue', message: 'Rating waarde is verplicht' });
-    }
-    if (!schema.reviewRating.bestRating) {
-      issues.push({ type: 'warning', field: 'reviewRating.bestRating', message: 'Best rating wordt aanbevolen (meestal 5)' });
-    }
-  }
-
-  if (!schema.author) {
-    issues.push({ type: 'error', field: 'author', message: 'Review auteur is verplicht' });
-  }
-
-  if (!schema.itemReviewed) {
-    issues.push({ type: 'error', field: 'itemReviewed', message: 'itemReviewed is verplicht voor Review' });
-  }
-
-  return issues;
-}
-
-function validateFAQPage(schema: any): ValidationIssue[] {
-  const issues: ValidationIssue[] = [];
-
-  if (!schema.mainEntity || !Array.isArray(schema.mainEntity)) {
-    issues.push({ type: 'error', field: 'mainEntity', message: 'mainEntity array met vragen is verplicht' });
-    return issues;
-  }
-
-  if (schema.mainEntity.length < 2) {
-    issues.push({ type: 'warning', field: 'mainEntity', message: 'Minimaal 2 vragen wordt aanbevolen voor FAQ' });
-  }
-
-  schema.mainEntity.forEach((question: any, i: number) => {
-    if (question['@type'] !== 'Question') {
-      issues.push({ type: 'error', field: `mainEntity[${i}]`, message: '@type moet "Question" zijn' });
-    }
-    if (!question.name) {
-      issues.push({ type: 'error', field: `mainEntity[${i}].name`, message: 'Vraag tekst (name) is verplicht' });
-    }
-    if (!question.acceptedAnswer) {
-      issues.push({ type: 'error', field: `mainEntity[${i}].acceptedAnswer`, message: 'Antwoord is verplicht' });
-    } else {
-      if (!question.acceptedAnswer.text && !question.acceptedAnswer.text) {
-        issues.push({ type: 'error', field: `mainEntity[${i}].acceptedAnswer`, message: 'Antwoord tekst is verplicht' });
-      }
-    }
-  });
-
-  return issues;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { schema } = await req.json();
+    const { structuredData } = await req.json();
 
-    if (!schema) {
+    if (!structuredData) {
       return new Response(
-        JSON.stringify({ error: 'Schema is verplicht' }),
+        JSON.stringify({ error: 'Structured data is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Validating schema:', schema['@type']);
-
-    const issues: ValidationIssue[] = [];
-    const schemaType = schema['@type'];
-
-    // Validate @context
-    if (!schema['@context']) {
-      issues.push({ type: 'error', field: '@context', message: '@context is verplicht (https://schema.org)' });
-    } else if (schema['@context'] !== 'https://schema.org') {
-      issues.push({ type: 'warning', field: '@context', message: '@context moet https://schema.org zijn' });
+    // Parse JSON if it's a string
+    let jsonData;
+    try {
+      jsonData = typeof structuredData === 'string' 
+        ? JSON.parse(structuredData) 
+        : structuredData;
+    } catch (parseError) {
+      return new Response(
+        JSON.stringify({ 
+          valid: false,
+          errors: ['Invalid JSON syntax'],
+          warnings: [],
+          suggestions: ['Check for missing commas, brackets, or quotes']
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // Validate @type
-    if (!schema['@type']) {
-      issues.push({ type: 'error', field: '@type', message: '@type is verplicht' });
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Type-specific validation
-    switch (schemaType) {
-      case 'BlogPosting':
-        issues.push(...validateBlogPosting(schema));
-        break;
-      case 'Article':
-      case 'NewsArticle':
-      case 'TechArticle':
-        issues.push(...validateArticle(schema));
-        break;
-      case 'VideoObject':
-        issues.push(...validateVideoObject(schema));
-        break;
-      case 'Review':
-        issues.push(...validateReview(schema));
-        break;
-      case 'FAQPage':
-        issues.push(...validateFAQPage(schema));
-        break;
-      default:
-        issues.push({ type: 'warning', field: '@type', message: `Schema type "${schemaType}" wordt niet volledig gevalideerd` });
+    const prompt = `Valideer de volgende structured data (Schema.org JSON-LD) en geef gedetailleerde feedback:
+
+${JSON.stringify(jsonData, null, 2)}
+
+Analyseer op:
+1. Schema.org compliance
+2. Vereiste velden voor het type
+3. Data types en formaten
+4. Best practices
+5. Mogelijke verbeteringen
+
+Geef terug:
+- Of het valid is
+- Lijst van errors (critical issues)
+- Lijst van warnings (non-critical issues)
+- Lijst van suggestions voor verbetering`;
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: 'Je bent een Schema.org expert die structured data valideert volgens de officiële specificaties.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'validate_structured_data',
+              description: 'Validate Schema.org structured data',
+              parameters: {
+                type: 'object',
+                properties: {
+                  valid: { type: 'boolean' },
+                  errors: {
+                    type: 'array',
+                    items: { type: 'string' }
+                  },
+                  warnings: {
+                    type: 'array',
+                    items: { type: 'string' }
+                  },
+                  suggestions: {
+                    type: 'array',
+                    items: { type: 'string' }
+                  }
+                },
+                required: ['valid', 'errors', 'warnings', 'suggestions']
+              }
+            }
+          }
+        ],
+        tool_choice: { type: 'function', function: { name: 'validate_structured_data' } }
+      }),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'Payment required. Please add credits to your Lovable AI workspace.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      const errorText = await response.text();
+      console.error('AI API error:', response.status, errorText);
+      throw new Error(`AI API error: ${response.status}`);
     }
 
-    // Calculate score
-    const errorCount = issues.filter(i => i.type === 'error').length;
-    const warningCount = issues.filter(i => i.type === 'warning').length;
-    const score = Math.max(0, 100 - (errorCount * 20) - (warningCount * 5));
+    const data = await response.json();
+    const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+    
+    if (!toolCall) {
+      throw new Error('No tool call in response');
+    }
 
-    const result: ValidationResult = {
-      valid: errorCount === 0,
-      schemaType,
-      issues,
-      score
-    };
-
-    console.log(`Validation complete: ${result.valid ? 'VALID' : 'INVALID'}, Score: ${score}`);
+    const result = JSON.parse(toolCall.function.arguments);
 
     return new Response(
-      JSON.stringify(result),
+      JSON.stringify({
+        ...result,
+        metadata: {
+          validatedAt: new Date().toISOString(),
+          schemaType: jsonData['@type'] || 'Unknown'
+        }
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -275,10 +153,7 @@ serve(async (req) => {
     console.error('Error in validate-structured-data function:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });

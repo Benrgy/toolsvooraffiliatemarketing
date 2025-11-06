@@ -1,227 +1,207 @@
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Image, AlertCircle, CheckCircle, Download } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Image as ImageIcon, Download, Upload } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
-interface ImageOptimizerProps {
-  imageUrl: string;
-  altText: string;
-  onUpdate: (data: {
-    alt: string;
-    title: string;
-    caption: string;
-    width?: number;
-    height?: number;
-    format?: string;
-  }) => void;
-}
+export const ImageOptimizer = () => {
+  const [file, setFile] = useState<File | null>(null);
+  const [quality, setQuality] = useState([80]);
+  const [format, setFormat] = useState('webp');
+  const [width, setWidth] = useState('');
+  const [preview, setPreview] = useState('');
 
-export const ImageOptimizer = ({ imageUrl, altText, onUpdate }: ImageOptimizerProps) => {
-  const [alt, setAlt] = useState(altText || '');
-  const [title, setTitle] = useState('');
-  const [caption, setCaption] = useState('');
-  const [imageInfo, setImageInfo] = useState<{
-    width?: number;
-    height?: number;
-    size?: number;
-    format?: string;
-  }>({});
-  const [loading, setLoading] = useState(false);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      if (!selectedFile.type.startsWith('image/')) {
+        toast({
+          title: 'Ongeldig bestand',
+          description: 'Selecteer een afbeelding.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-  const analyzeImage = async () => {
-    if (!imageUrl) return;
-    
-    setLoading(true);
-    try {
-      const img = document.createElement('img');
-      img.onload = () => {
-        const info = {
-          width: img.naturalWidth,
-          height: img.naturalHeight,
-          format: imageUrl.split('.').pop()?.toUpperCase() || 'UNKNOWN'
-        };
-        setImageInfo(info);
+      setFile(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
       };
-      img.src = imageUrl;
-    } catch (error) {
-      console.error('Image analysis error:', error);
-    } finally {
-      setLoading(false);
+      reader.readAsDataURL(selectedFile);
     }
   };
 
-  const handleSave = () => {
-    onUpdate({
-      alt,
-      title,
-      caption,
-      width: imageInfo.width,
-      height: imageInfo.height,
-      format: imageInfo.format
-    });
-  };
+  const handleOptimize = async () => {
+    if (!file) {
+      toast({
+        title: 'Geen afbeelding geselecteerd',
+        description: 'Upload eerst een afbeelding.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  const getOptimizationScore = () => {
-    let score = 0;
-    if (alt && alt.length > 10) score += 25;
-    if (title && title.length > 5) score += 25;
-    if (imageInfo.width && imageInfo.width <= 1920) score += 25;
-    if (imageInfo.format === 'WEBP' || imageInfo.format === 'AVIF') score += 25;
-    return score;
-  };
+    try {
+      // Create canvas for image manipulation
+      const img = new Image();
+      img.src = preview;
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+      });
 
-  const score = getOptimizationScore();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        throw new Error('Could not get canvas context');
+      }
+
+      // Calculate new dimensions
+      let newWidth = width ? parseInt(width) : img.width;
+      let newHeight = width ? (parseInt(width) / img.width) * img.height : img.height;
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      // Draw resized image
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+      // Convert to desired format
+      const mimeType = format === 'jpg' ? 'image/jpeg' : `image/${format}`;
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(
+          (blob) => resolve(blob),
+          mimeType,
+          quality[0] / 100
+        );
+      });
+
+      if (!blob) {
+        throw new Error('Failed to create blob');
+      }
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `optimized-${file.name.split('.')[0]}.${format}`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      // Show file size comparison
+      const originalSize = (file.size / 1024).toFixed(2);
+      const optimizedSize = (blob.size / 1024).toFixed(2);
+      const reduction = (((file.size - blob.size) / file.size) * 100).toFixed(1);
+
+      toast({
+        title: 'Afbeelding geoptimaliseerd',
+        description: `${originalSize}KB → ${optimizedSize}KB (${reduction}% kleiner)`,
+      });
+    } catch (error) {
+      console.error('Error optimizing image:', error);
+      toast({
+        title: 'Fout bij optimalisatie',
+        description: 'Er is iets misgegaan. Probeer het opnieuw.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
-    <Card className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Image className="h-5 w-5" />
-          <h3 className="text-lg font-semibold">Image SEO Optimalisatie</h3>
-        </div>
-        <Badge variant={score >= 75 ? 'default' : score >= 50 ? 'secondary' : 'destructive'}>
-          Score: {score}/100
-        </Badge>
-      </div>
+    <div className="space-y-6">
+      <h3 className="text-lg font-semibold">Afbeelding Optimizer</h3>
 
-      {imageUrl && (
-        <div className="space-y-4">
-          <div className="rounded-lg border overflow-hidden">
-            <img 
-              src={imageUrl} 
-              alt={alt || 'Preview'} 
-              className="w-full h-48 object-cover"
-              onLoad={analyzeImage}
-            />
-          </div>
-
-          {imageInfo.width && (
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-muted-foreground">Dimensies</p>
-                <p className="font-semibold">{imageInfo.width} × {imageInfo.height}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Format</p>
-                <p className="font-semibold">{imageInfo.format}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Aspect Ratio</p>
-                <p className="font-semibold">
-                  {imageInfo.width && imageInfo.height 
-                    ? `${(imageInfo.width / imageInfo.height).toFixed(2)}:1`
-                    : 'N/A'}
-                </p>
-              </div>
+      <Card className="p-6">
+        <div className="space-y-6">
+          <div>
+            <Label htmlFor="image-upload">Upload Afbeelding</Label>
+            <div className="mt-2">
+              <label htmlFor="image-upload" className="cursor-pointer">
+                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
+                  {preview ? (
+                    <img
+                      src={preview}
+                      alt="Preview"
+                      className="max-h-48 mx-auto rounded"
+                    />
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">
+                        Klik om een afbeelding te uploaden
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </label>
             </div>
-          )}
+          </div>
 
           <div className="space-y-4">
-            <Alert variant={alt.length > 10 ? 'default' : 'destructive'}>
-              {alt.length > 10 ? (
-                <CheckCircle className="h-4 w-4" />
-              ) : (
-                <AlertCircle className="h-4 w-4" />
-              )}
-              <AlertDescription>
-                {alt.length > 10 
-                  ? 'Alt tekst is goed geoptimaliseerd!'
-                  : 'Alt tekst is te kort. Gebruik 10-125 karakters voor beste resultaten.'}
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-              <Label htmlFor="imageAlt">Alt Tekst * (SEO Kritiek)</Label>
-              <Input
-                id="imageAlt"
-                value={alt}
-                onChange={(e) => setAlt(e.target.value)}
-                placeholder="Beschrijvende alt tekst met keywords..."
-                maxLength={125}
+            <div>
+              <Label>Kwaliteit: {quality[0]}%</Label>
+              <Slider
+                value={quality}
+                onValueChange={setQuality}
+                min={1}
+                max={100}
+                step={1}
+                className="mt-2"
               />
-              <p className="text-xs text-muted-foreground">
-                {alt.length}/125 karakters - Beschrijf wat er op de afbeelding staat
+              <p className="text-xs text-muted-foreground mt-1">
+                Lagere kwaliteit = kleinere bestandsgrootte
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="imageTitle">Title Attribuut</Label>
-              <Input
-                id="imageTitle"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Image title voor tooltips..."
-                maxLength={100}
-              />
-              <p className="text-xs text-muted-foreground">
-                Optioneel - Wordt getoond bij hover
-              </p>
+            <div>
+              <Label htmlFor="format">Formaat</Label>
+              <Select value={format} onValueChange={setFormat}>
+                <SelectTrigger id="format" className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="webp">WebP (Aanbevolen)</SelectItem>
+                  <SelectItem value="jpg">JPEG</SelectItem>
+                  <SelectItem value="png">PNG</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="imageCaption">Caption</Label>
+            <div>
+              <Label htmlFor="width">Breedte (pixels, optioneel)</Label>
               <Input
-                id="imageCaption"
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Zichtbare caption onder de afbeelding..."
-                maxLength={200}
+                id="width"
+                type="number"
+                placeholder="Auto"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                className="mt-2"
               />
-              <p className="text-xs text-muted-foreground">
-                Optioneel - Helpt context te geven
+              <p className="text-xs text-muted-foreground mt-1">
+                Hoogte wordt automatisch berekend
               </p>
             </div>
           </div>
 
-          {imageInfo.format && imageInfo.format !== 'WEBP' && imageInfo.format !== 'AVIF' && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Tip:</strong> Gebruik WebP of AVIF formaat voor betere prestaties en SEO.
-                Deze moderne formaten zijn 25-35% kleiner dan JPEG/PNG.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {imageInfo.width && imageInfo.width > 1920 && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Waarschuwing:</strong> Afbeelding is te groot ({imageInfo.width}px breed).
-                Schaal terug naar max 1920px voor betere laadtijd.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <Button onClick={handleSave} className="w-full">
-            Sla Optimalisaties Op
+          <Button onClick={handleOptimize} disabled={!file} className="w-full">
+            <Download className="h-4 w-4 mr-2" />
+            Optimaliseer & Download
           </Button>
         </div>
-      )}
-
-      {!imageUrl && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Voeg eerst een featured image toe om de SEO optimalisaties te zien.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-2 text-sm">
-        <h4 className="font-semibold">Best Practices:</h4>
-        <ul className="space-y-1 text-muted-foreground">
-          <li>✓ Gebruik beschrijvende alt tekst met focus keyword</li>
-          <li>✓ Houd afbeeldingen onder 200KB voor snelle laadtijd</li>
-          <li>✓ Gebruik WebP/AVIF formaat waar mogelijk</li>
-          <li>✓ Max breedte 1920px voor desktop displays</li>
-          <li>✓ Aspect ratio 16:9 of 4:3 voor blog posts</li>
-        </ul>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
