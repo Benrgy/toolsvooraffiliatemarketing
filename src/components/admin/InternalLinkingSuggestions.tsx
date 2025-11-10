@@ -23,9 +23,11 @@ interface Props {
   postId?: string;
   content: string;
   title: string;
+  focusKeyword?: string;
+  currentPostId?: string;
 }
 
-export const InternalLinkingSuggestions = ({ postId, content, title }: Props) => {
+export const InternalLinkingSuggestions = ({ postId, content, title, focusKeyword, currentPostId }: Props) => {
   const [suggestions, setSuggestions] = useState<InternalLinkSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -44,9 +46,10 @@ export const InternalLinkingSuggestions = ({ postId, content, title }: Props) =>
     try {
       const { data, error } = await supabase.functions.invoke('internal-linking', {
         body: { 
-          postId: postId || null,
+          postId: postId || currentPostId || null,
           content: content.substring(0, 3000), // Limit content length
-          title 
+          title,
+          focusKeyword 
         }
       });
 

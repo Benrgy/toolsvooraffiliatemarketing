@@ -8,7 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Image as ImageIcon, Download, Upload } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
-export const ImageOptimizer = () => {
+interface Props {
+  imageUrl: string;
+  altText: string;
+  onUpdate: (updates: { alt: string; title?: string; caption?: string }) => void;
+}
+
+export const ImageOptimizer = ({ imageUrl, altText, onUpdate }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [quality, setQuality] = useState([80]);
   const [format, setFormat] = useState('webp');

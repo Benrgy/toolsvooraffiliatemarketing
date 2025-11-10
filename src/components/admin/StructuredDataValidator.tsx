@@ -19,7 +19,26 @@ interface ValidationResult {
   };
 }
 
-export const StructuredDataValidator = () => {
+interface Props {
+  title?: string;
+  content?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  featuredImage?: string;
+  featuredImageAlt?: string;
+  videoUrl?: string;
+  videoThumbnailUrl?: string;
+  videoDuration?: string;
+  videoDescription?: string;
+  reviewRating?: number;
+  reviewCount?: number;
+  factChecked?: boolean;
+  expertReviewed?: boolean;
+  schemaType?: string;
+  slug?: string;
+}
+
+export const StructuredDataValidator = (props: Props) => {
   const [structuredData, setStructuredData] = useState('');
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [loading, setLoading] = useState(false);

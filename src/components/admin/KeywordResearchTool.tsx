@@ -15,8 +15,13 @@ interface KeywordSuggestion {
   relevanceScore: number;
 }
 
-export const KeywordResearchTool = () => {
-  const [focusKeyword, setFocusKeyword] = useState('');
+interface Props {
+  initialKeyword?: string;
+  onSelectKeyword?: (keyword: string) => void;
+}
+
+export const KeywordResearchTool = ({ initialKeyword = '', onSelectKeyword }: Props) => {
+  const [focusKeyword, setFocusKeyword] = useState(initialKeyword);
   const [keywords, setKeywords] = useState<KeywordSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
 

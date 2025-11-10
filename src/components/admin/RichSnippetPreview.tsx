@@ -4,17 +4,23 @@ import { Star, User, Calendar } from 'lucide-react';
 interface Props {
   title: string;
   metaDescription: string;
+  metaTitle?: string;
+  slug?: string;
+  featuredImage?: string;
+  videoUrl?: string;
+  reviewRating?: number;
+  reviewCount?: number;
+  factChecked?: boolean;
+  expertReviewed?: boolean;
+  schemaType?: string;
   author?: string;
   publishDate?: string;
   rating?: number;
-  reviewCount?: number;
 }
 
 export const RichSnippetPreview = ({
   title,
   metaDescription,
-  author,
-  publishDate,
   rating,
   reviewCount,
 }: Props) => {
@@ -31,23 +37,6 @@ export const RichSnippetPreview = ({
           <h4 className="text-xl text-blue-600 hover:underline cursor-pointer font-normal">
             {title || 'Artikel Titel'}
           </h4>
-          
-          {(author || publishDate) && (
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              {author && (
-                <div className="flex items-center gap-1">
-                  <User className="h-3 w-3" />
-                  <span>{author}</span>
-                </div>
-              )}
-              {publishDate && (
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  <span>{new Date(publishDate).toLocaleDateString('nl-NL')}</span>
-                </div>
-              )}
-            </div>
-          )}
           
           {rating && reviewCount && (
             <div className="flex items-center gap-2">
