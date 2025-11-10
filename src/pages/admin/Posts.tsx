@@ -13,7 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { Link } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Clock } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import {
   Select,
@@ -136,6 +136,7 @@ export default function Posts() {
               <SelectItem value="all">Alle statussen</SelectItem>
               <SelectItem value="published">Gepubliceerd</SelectItem>
               <SelectItem value="draft">Concept</SelectItem>
+              <SelectItem value="scheduled">Gepland</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -169,13 +170,33 @@ export default function Posts() {
                       <TableCell className="font-medium">{post.title}</TableCell>
                       <TableCell>{post.category}</TableCell>
                       <TableCell>
-                        <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                          {post.status === 'published' ? 'Gepubliceerd' : 'Concept'}
+                        <Badge 
+                          variant={
+                            post.status === 'published' 
+                              ? 'default' 
+                              : post.status === 'scheduled' 
+                                ? 'outline' 
+                                : 'secondary'
+                          }
+                          className={post.status === 'scheduled' ? 'border-blue-500 text-blue-500' : ''}
+                        >
+                          {post.status === 'scheduled' && <Clock className="h-3 w-3 mr-1 inline" />}
+                          {post.status === 'published' 
+                            ? 'Gepubliceerd' 
+                            : post.status === 'scheduled' 
+                              ? 'Gepland' 
+                              : 'Concept'}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         {post.published_at
-                          ? new Date(post.published_at).toLocaleDateString('nl-NL')
+                          ? new Date(post.published_at).toLocaleDateString('nl-NL', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: post.status === 'scheduled' ? '2-digit' : undefined,
+                              minute: post.status === 'scheduled' ? '2-digit' : undefined,
+                            })
                           : '-'}
                       </TableCell>
                       <TableCell className="text-right">

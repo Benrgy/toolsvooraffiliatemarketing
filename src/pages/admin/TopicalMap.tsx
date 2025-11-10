@@ -9,7 +9,7 @@ import { CheckCircle2, Clock, Circle, Plus } from 'lucide-react';
 import topicalMapData from '@/data/topical-map.json';
 
 interface PostStatus {
-  [slug: string]: 'published' | 'draft' | 'none';
+  [slug: string]: 'published' | 'draft' | 'scheduled' | 'none';
 }
 
 export default function TopicalMap() {
@@ -27,7 +27,7 @@ export default function TopicalMap() {
 
     const statuses: PostStatus = {};
     posts?.forEach(post => {
-      statuses[post.slug] = post.status as 'published' | 'draft';
+      statuses[post.slug] = post.status as 'published' | 'draft' | 'scheduled';
     });
 
     setPostStatuses(statuses);
@@ -41,6 +41,8 @@ export default function TopicalMap() {
         return <CheckCircle2 className="h-5 w-5 text-green-500" />;
       case 'draft':
         return <Clock className="h-5 w-5 text-yellow-500" />;
+      case 'scheduled':
+        return <Clock className="h-5 w-5 text-blue-500" />;
       default:
         return <Circle className="h-5 w-5 text-gray-300" />;
     }
@@ -53,6 +55,8 @@ export default function TopicalMap() {
         return <Badge variant="default">Gepubliceerd</Badge>;
       case 'draft':
         return <Badge variant="secondary">Concept</Badge>;
+      case 'scheduled':
+        return <Badge variant="outline" className="border-blue-500 text-blue-500">Gepland</Badge>;
       default:
         return <Badge variant="outline">Niet aangemaakt</Badge>;
     }

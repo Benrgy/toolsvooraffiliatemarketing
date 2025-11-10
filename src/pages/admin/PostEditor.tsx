@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
-import { ArrowLeft, Save, Eye, Wand2, Sparkles, Globe, Video, Award } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Wand2, Sparkles, Globe, Video, Award, Clock } from 'lucide-react';
 import { ContentGenerationModal } from '@/components/admin/ContentGenerationModal';
 import { SEOAnalyzerPanel } from '@/components/admin/SEOAnalyzerPanel';
 import { ImageOptimizer } from '@/components/admin/ImageOptimizer';
@@ -21,6 +21,7 @@ import { RichSnippetPreview } from '@/components/admin/RichSnippetPreview';
 import { StructuredDataValidator } from '@/components/admin/StructuredDataValidator';
 import { KeywordResearchTool } from '@/components/admin/KeywordResearchTool';
 import { InternalLinkingSuggestions } from '@/components/admin/InternalLinkingSuggestions';
+import { DateTimePicker } from '@/components/ui/date-time-picker';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -48,7 +49,8 @@ export default function PostEditor() {
   const [excerpt, setExcerpt] = useState('');
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
-  const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [status, setStatus] = useState<'draft' | 'published' | 'scheduled'>('draft');
+  const [publishedAt, setPublishedAt] = useState<Date | undefined>();
   const [featured, setFeatured] = useState(false);
   const [metaTitle, setMetaTitle] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
@@ -128,8 +130,11 @@ export default function PostEditor() {
     setExcerpt(post.excerpt || '');
     setContent(post.content || '');
     setCategory(post.category || '');
-    setStatus((post.status as 'draft' | 'published') || 'draft');
+    setStatus((post.status as 'draft' | 'published' | 'scheduled') || 'draft');
     setFeatured(post.featured || false);
+    if (post.published_at) {
+      setPublishedAt(new Date(post.published_at));
+    }
     setMetaTitle(post.meta_title || '');
     setMetaDescription(post.meta_description || '');
     setFeaturedImage(post.featured_image || '');
@@ -292,6 +297,25 @@ export default function PostEditor() {
       }
     }
 
+    // Validate scheduled posts
+    if (status === 'scheduled' && !publishedAt) {
+      toast({
+        title: 'Validatiefout',
+        description: 'Kies een publicatiedatum en tijd voor geplande posts',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (status === 'scheduled' && publishedAt && publishedAt <= new Date()) {
+      toast({
+        title: 'Validatiefout',
+        description: 'De publicatiedatum moet in de toekomst liggen',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     // Calculate word count and links
@@ -336,7 +360,9 @@ export default function PostEditor() {
       internal_links_count: internalLinks,
       external_links_count: externalLinks,
       author_id: user?.id,
-      published_at: publish ? new Date().toISOString() : null,
+      published_at: publish 
+        ? new Date().toISOString() 
+        : (status === 'scheduled' && publishedAt ? publishedAt.toISOString() : null),
     };
 
     if (isEdit) {
@@ -945,16 +971,36 @@ export default function PostEditor() {
 
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={(value: 'draft' | 'published') => setStatus(value)}>
+              <Select value={status} onValueChange={(value: 'draft' | 'published' | 'scheduled') => setStatus(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft">Concept</SelectItem>
                   <SelectItem value="published">Gepubliceerd</SelectItem>
+                  <SelectItem value="scheduled">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Gepland
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
+            {status === 'scheduled' && (
+              <div className="space-y-2">
+                <Label>Publicatiedatum en tijd</Label>
+                <DateTimePicker
+                  date={publishedAt}
+                  setDate={setPublishedAt}
+                  placeholder="Kies wanneer de post gepubliceerd moet worden"
+                />
+                <p className="text-sm text-muted-foreground">
+                  De post wordt automatisch gepubliceerd op het gekozen moment
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
