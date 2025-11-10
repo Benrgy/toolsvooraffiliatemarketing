@@ -22,6 +22,7 @@ import { StructuredDataValidator } from '@/components/admin/StructuredDataValida
 import { KeywordResearchTool } from '@/components/admin/KeywordResearchTool';
 import { InternalLinkingSuggestions } from '@/components/admin/InternalLinkingSuggestions';
 import { DateTimePicker } from '@/components/ui/date-time-picker';
+import { RichContentEditor } from '@/components/admin/RichContentEditor';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
@@ -507,17 +508,10 @@ export default function PostEditor() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="content">Content *</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Schrijf je artikel hier..."
-                rows={15}
-                className="font-mono"
-              />
-            </div>
+            <RichContentEditor
+              content={content}
+              onChange={setContent}
+            />
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
