@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Image, Video, Upload, Loader2, Link } from 'lucide-react';
+import { Image as ImageIcon, Video, Upload, Loader2, Link } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -33,6 +33,61 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
+
+  const optimizeImage = async (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject(new Error('Could not get canvas context'));
+        return;
+      }
+
+      img.onload = () => {
+        // Set maximum dimensions
+        const MAX_WIDTH = 1920;
+        const MAX_HEIGHT = 1920;
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions while maintaining aspect ratio
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width > height) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          } else {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Draw image on canvas
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to blob with compression
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              console.log(`Image optimized: ${Math.round(file.size / 1024)}KB → ${Math.round(blob.size / 1024)}KB`);
+              resolve(blob);
+            } else {
+              reject(new Error('Failed to create blob'));
+            }
+          },
+          'image/jpeg',
+          0.85 // 85% quality
+        );
+      };
+
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
 
   const insertAtCursor = (text: string) => {
     const textarea = textareaRef.current;
@@ -74,14 +129,16 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
 
     setUploading(true);
     try {
+      // Optimize image before upload
+      const optimizedImage = await optimizeImage(imageFile);
+      
       // Upload to Supabase Storage
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
       const filePath = `content/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, imageFile);
+        .upload(filePath, optimizedImage);
 
       if (uploadError) throw uploadError;
 
@@ -233,14 +290,16 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
     
     setUploading(true);
     try {
+      // Optimize image before upload
+      const optimizedImage = await optimizeImage(file);
+      
       // Upload to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
       const filePath = `content/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, file);
+        .upload(filePath, optimizedImage);
 
       if (uploadError) throw uploadError;
 
@@ -283,7 +342,7 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
           <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
             <DialogTrigger asChild>
               <Button type="button" variant="outline" size="sm">
-                <Image className="h-4 w-4 mr-2" />
+                <ImageIcon className="h-4 w-4 mr-2" />
                 Afbeelding
               </Button>
             </DialogTrigger>
