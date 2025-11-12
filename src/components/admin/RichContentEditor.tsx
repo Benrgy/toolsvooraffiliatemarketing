@@ -17,6 +17,7 @@ interface Props {
 export const RichContentEditor = ({ content, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Image upload dialog state
   const [showImageDialog, setShowImageDialog] = useState(false);
@@ -198,6 +199,82 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
     });
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+    if (imageFiles.length === 0) {
+      toast({
+        title: 'Geen afbeeldingen gevonden',
+        description: 'Sleep alleen afbeeldingen naar dit veld.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Process first image file
+    const file = imageFiles[0];
+    
+    setUploading(true);
+    try {
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `content/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('blog-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(filePath);
+
+      // Generate simple alt text from filename
+      const simpleAlt = file.name.split('.')[0].replace(/[-_]/g, ' ');
+      
+      // Create HTML with basic SEO attributes
+      const imageHtml = `\n<figure class="mx-auto my-4">
+  <img src="${publicUrl}" alt="${simpleAlt}" class="rounded-lg max-w-full h-auto" loading="lazy" />
+</figure>\n\n`;
+
+      insertAtCursor(imageHtml);
+
+      toast({
+        title: 'Afbeelding toegevoegd',
+        description: 'Je kunt de SEO attributen later aanpassen via de afbeelding knop.',
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: 'Upload mislukt',
+        description: error instanceof Error ? error.message : 'Er is een fout opgetreden',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -368,15 +445,41 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
         </div>
       </div>
       
-      <Textarea
-        id="content"
-        ref={textareaRef}
-        value={content}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Begin met typen... Gebruik de knoppen hierboven om media in te voegen."
-        rows={20}
-        className="font-mono text-sm"
-      />
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative transition-all ${
+          isDragging ? 'ring-2 ring-primary ring-offset-2' : ''
+        }`}
+      >
+        <Textarea
+          id="content"
+          ref={textareaRef}
+          value={content}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Begin met typen... Gebruik de knoppen hierboven om media in te voegen, of sleep afbeeldingen hierheen."
+          rows={20}
+          className="font-mono text-sm"
+          disabled={uploading}
+        />
+        {isDragging && (
+          <div className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-md flex items-center justify-center pointer-events-none">
+            <div className="bg-background/90 px-6 py-4 rounded-lg shadow-lg">
+              <Upload className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <p className="text-sm font-medium">Sleep afbeelding hier</p>
+            </div>
+          </div>
+        )}
+        {uploading && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center rounded-md">
+            <div className="bg-background px-6 py-4 rounded-lg shadow-lg">
+              <Loader2 className="h-8 w-8 mx-auto mb-2 text-primary animate-spin" />
+              <p className="text-sm font-medium">Uploaden...</p>
+            </div>
+          </div>
+        )}
+      </div>
       <p className="text-xs text-muted-foreground">
         {content.split(/\s+/).filter(Boolean).length} woorden
       </p>
