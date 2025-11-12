@@ -26,6 +26,8 @@ import { RichContentEditor } from '@/components/admin/RichContentEditor';
 import { cn } from '@/lib/utils';
 import type { GenerationConfig } from '@/types/blog';
 import { Badge } from '@/components/ui/badge';
+import { ContentPreview } from '@/components/admin/ContentPreview';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Titel is verplicht').max(200, 'Titel te lang'),
@@ -409,7 +411,7 @@ export default function PostEditor() {
 
   return (
     <AdminLayout>
-      <div className="max-w-4xl space-y-6">
+      <div className="max-w-7xl space-y-6 mx-auto w-full">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/admin/posts')}>
@@ -442,158 +444,175 @@ export default function PostEditor() {
           </TabsList>
 
           <TabsContent value="content" className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Titel *</Label>
-              <div className="relative">
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Voer de post titel in..."
-                  className="pr-12"
-                />
-                {title && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="absolute right-1 top-1/2 -translate-y-1/2"
-                          onClick={() => setShowContentModal(true)}
-                          disabled={isGenerating}
-                        >
-                          <Wand2 className={cn("h-4 w-4", isGenerating && "animate-spin")} />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Genereer blog content met AI</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-            </div>
+            <ResizablePanelGroup direction="horizontal" className="min-h-[calc(100vh-16rem)] rounded-lg border">
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full overflow-auto p-6 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Titel *</Label>
+                    <div className="relative">
+                      <Input
+                        id="title"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="Voer de post titel in..."
+                        className="pr-12"
+                      />
+                      {title && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-1 top-1/2 -translate-y-1/2"
+                                onClick={() => setShowContentModal(true)}
+                                disabled={isGenerating}
+                              >
+                                <Wand2 className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Genereer blog content met AI</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug *</Label>
-              <Input
-                id="slug"
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                placeholder="post-slug"
-              />
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">Slug *</Label>
+                    <Input
+                      id="slug"
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      placeholder="post-slug"
+                    />
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Categorie *</Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Affiliate Marketing"
-              />
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categorie *</Label>
+                    <Input
+                      id="category"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      placeholder="Affiliate Marketing"
+                    />
+                  </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt</Label>
-              <Textarea
-                id="excerpt"
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                placeholder="Korte samenvatting..."
-                rows={3}
-              />
-              <p className="text-sm text-muted-foreground">
-                {excerpt.length}/500 karakters
-              </p>
-            </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="excerpt">Excerpt</Label>
+                    <Textarea
+                      id="excerpt"
+                      value={excerpt}
+                      onChange={(e) => setExcerpt(e.target.value)}
+                      placeholder="Korte samenvatting..."
+                      rows={3}
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      {excerpt.length}/500 karakters
+                    </p>
+                  </div>
 
-            <RichContentEditor
-              content={content}
-              onChange={setContent}
-            />
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="featuredImage">Featured Image URL</Label>
-                {title && (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleGenerateImage}
-                          disabled={isGeneratingImage}
-                        >
-                          <Wand2 className={cn("h-4 w-4 mr-2", isGeneratingImage && "animate-spin")} />
-                          {isGeneratingImage ? 'Genereren...' : 'AI Genereren'}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Genereer blog image met AI</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
-              <Input
-                id="featuredImage"
-                value={featuredImage}
-                onChange={(e) => setFeaturedImage(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-              />
-              {featuredImage && (
-                <div className="mt-2 rounded-lg border overflow-hidden">
-                  <img 
-                    src={featuredImage} 
-                    alt={featuredImageAlt || 'Featured image preview'} 
-                    className="w-full h-48 object-cover"
+                  <RichContentEditor
+                    content={content}
+                    onChange={setContent}
                   />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="featuredImage">Featured Image URL</Label>
+                      {title && (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleGenerateImage}
+                                disabled={isGeneratingImage}
+                              >
+                                <Wand2 className={cn("h-4 w-4 mr-2", isGeneratingImage && "animate-spin")} />
+                                {isGeneratingImage ? 'Genereren...' : 'AI Genereren'}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Genereer blog image met AI</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      )}
+                    </div>
+                    <Input
+                      id="featuredImage"
+                      value={featuredImage}
+                      onChange={(e) => setFeaturedImage(e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    {featuredImage && (
+                      <div className="mt-2 rounded-lg border overflow-hidden">
+                        <img 
+                          src={featuredImage} 
+                          alt={featuredImageAlt || 'Featured image preview'} 
+                          className="w-full h-48 object-cover"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="featuredImageAlt">Featured Image Alt Tekst</Label>
+                    <Input
+                      id="featuredImageAlt"
+                      value={featuredImageAlt}
+                      onChange={(e) => setFeaturedImageAlt(e.target.value)}
+                      placeholder="Beschrijving van de afbeelding"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="featuredImageTitle">Featured Image Title</Label>
+                    <Input
+                      id="featuredImageTitle"
+                      value={featuredImageTitle}
+                      onChange={(e) => setFeaturedImageTitle(e.target.value)}
+                      placeholder="Titel voor de afbeelding"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="featuredImageCaption">Featured Image Caption</Label>
+                    <Input
+                      id="featuredImageCaption"
+                      value={featuredImageCaption}
+                      onChange={(e) => setFeaturedImageCaption(e.target.value)}
+                      placeholder="Bijschrift voor de afbeelding"
+                    />
+                  </div>
+
+                  {featuredImage && (
+                    <ImageOptimizer
+                      imageUrl={featuredImage}
+                      altText={featuredImageAlt}
+                      onUpdate={(updates) => {
+                        setFeaturedImageAlt(updates.alt);
+                        setFeaturedImageTitle(updates.title || '');
+                        setFeaturedImageCaption(updates.caption || '');
+                      }}
+                    />
+                  )}
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="featuredImageAlt">Featured Image Alt Tekst</Label>
-              <Input
-                id="featuredImageAlt"
-                value={featuredImageAlt}
-                onChange={(e) => setFeaturedImageAlt(e.target.value)}
-                placeholder="Beschrijving van de afbeelding"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="featuredImageTitle">Featured Image Title</Label>
-              <Input
-                id="featuredImageTitle"
-                value={featuredImageTitle}
-                onChange={(e) => setFeaturedImageTitle(e.target.value)}
-                placeholder="Titel voor de afbeelding"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="featuredImageCaption">Featured Image Caption</Label>
-              <Input
-                id="featuredImageCaption"
-                value={featuredImageCaption}
-                onChange={(e) => setFeaturedImageCaption(e.target.value)}
-                placeholder="Bijschrift voor de afbeelding"
-              />
-            </div>
-
-            {featuredImage && (
-              <ImageOptimizer
-                imageUrl={featuredImage}
-                altText={featuredImageAlt}
-                onUpdate={(updates) => {
-                  setFeaturedImageAlt(updates.alt);
-                  setFeaturedImageTitle(updates.title || '');
-                  setFeaturedImageCaption(updates.caption || '');
-                }}
-              />
-            )}
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <ContentPreview
+                  title={title}
+                  content={content}
+                  featuredImage={featuredImage}
+                  excerpt={excerpt}
+                />
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">
