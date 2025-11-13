@@ -36,7 +36,7 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDescription, setVideoDescription] = useState('');
 
-  const optimizeImage = async (file: File): Promise<Blob> => {
+  const optimizeImage = async (file: File): Promise<{ webp: Blob; jpeg: Blob }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const canvas = document.createElement('canvas');
@@ -71,21 +71,41 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
         // Draw image on canvas
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to WebP format for better compression
+        // Generate both WebP and JPEG for fallback support
+        let webpBlob: Blob | null = null;
+        let jpegBlob: Blob | null = null;
+
+        // First create WebP
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              const originalSizeKB = Math.round(file.size / 1024);
-              const optimizedSizeKB = Math.round(blob.size / 1024);
-              const compressionRatio = Math.round((1 - blob.size / file.size) * 100);
-              console.log(`Image optimized (WebP): ${originalSizeKB}KB → ${optimizedSizeKB}KB (${compressionRatio}% kleiner)`);
-              resolve(blob);
+              webpBlob = blob;
+              
+              // Then create JPEG fallback
+              canvas.toBlob(
+                (jpegBlobResult) => {
+                  if (jpegBlobResult) {
+                    jpegBlob = jpegBlobResult;
+                    
+                    const originalSizeKB = Math.round(file.size / 1024);
+                    const webpSizeKB = Math.round(webpBlob!.size / 1024);
+                    const jpegSizeKB = Math.round(jpegBlob.size / 1024);
+                    console.log(`Image optimized: ${originalSizeKB}KB → WebP: ${webpSizeKB}KB, JPEG fallback: ${jpegSizeKB}KB`);
+                    
+                    resolve({ webp: webpBlob!, jpeg: jpegBlob });
+                  } else {
+                    reject(new Error('Failed to create JPEG blob'));
+                  }
+                },
+                'image/jpeg',
+                0.85 // 85% quality for JPEG fallback
+              );
             } else {
-              reject(new Error('Failed to create blob'));
+              reject(new Error('Failed to create WebP blob'));
             }
           },
           'image/webp',
-          0.90 // 90% quality for WebP provides excellent quality with better compression than JPEG
+          0.90 // 90% quality for WebP
         );
       };
 
@@ -113,18 +133,22 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
     }, 0);
   };
 
-  const getImageMarkup = (url: string, alt: string, title: string, caption: string, position: string) => {
+  const getImageMarkup = (webpUrl: string, jpegUrl: string, alt: string, title: string, caption: string, position: string) => {
     if (mode === 'markdown') {
-      let markup = `![${alt}](${url}${title ? ` "${title}"` : ''})`;
+      // Markdown doesn't support picture element, use WebP as primary
+      let markup = `![${alt}](${webpUrl}${title ? ` "${title}"` : ''})`;
       if (caption) {
         markup += `\n*${caption}*`;
       }
       return markup;
     } else {
-      // HTML mode
+      // HTML mode with picture element for fallback support
       const alignClass = position === 'center' ? 'mx-auto' : position === 'right' ? 'ml-auto' : 'mr-auto';
       let html = `<figure class="my-6 ${alignClass}">\n`;
-      html += `  <img src="${url}" alt="${alt}"${title ? ` title="${title}"` : ''} class="rounded-lg shadow-md w-full" loading="lazy" />\n`;
+      html += `  <picture>\n`;
+      html += `    <source srcset="${webpUrl}" type="image/webp">\n`;
+      html += `    <img src="${jpegUrl}" alt="${alt}"${title ? ` title="${title}"` : ''} class="rounded-lg shadow-md w-full" loading="lazy" />\n`;
+      html += `  </picture>\n`;
       if (caption) {
         html += `  <figcaption class="text-center text-sm text-muted-foreground mt-2">${caption}</figcaption>\n`;
       }
@@ -173,26 +197,39 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
 
     setUploading(true);
     try {
-      // Optimize image before upload (converts to WebP)
-      const optimizedImage = await optimizeImage(imageFile);
+      // Optimize image before upload (generates both WebP and JPEG)
+      const { webp, jpeg } = await optimizeImage(imageFile);
       
-      // Upload to Supabase Storage
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-      const filePath = `content/${fileName}`;
+      // Upload both formats to Supabase Storage
+      const baseFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const webpPath = `content/${baseFileName}.webp`;
+      const jpegPath = `content/${baseFileName}.jpg`;
 
-      const { error: uploadError } = await supabase.storage
+      // Upload WebP
+      const { error: webpError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, optimizedImage);
+        .upload(webpPath, webp);
 
-      if (uploadError) throw uploadError;
+      if (webpError) throw webpError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Upload JPEG fallback
+      const { error: jpegError } = await supabase.storage
         .from('blog-images')
-        .getPublicUrl(filePath);
+        .upload(jpegPath, jpeg);
+
+      if (jpegError) throw jpegError;
+
+      // Get public URLs
+      const { data: { publicUrl: webpUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(webpPath);
+
+      const { data: { publicUrl: jpegUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(jpegPath);
 
       // Insert image markup (HTML or Markdown)
-      const imageMarkup = getImageMarkup(publicUrl, imageAlt, imageTitle, imageCaption, imagePosition);
+      const imageMarkup = getImageMarkup(webpUrl, jpegUrl, imageAlt, imageTitle, imageCaption, imagePosition);
       insertAtCursor(imageMarkup);
       
       // Reset form
@@ -302,29 +339,42 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
     
     setUploading(true);
     try {
-      // Optimize image before upload (converts to WebP)
-      const optimizedImage = await optimizeImage(file);
+      // Optimize image before upload (generates both WebP and JPEG)
+      const { webp, jpeg } = await optimizeImage(file);
       
-      // Upload to Supabase Storage
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
-      const filePath = `content/${fileName}`;
+      // Upload both formats to Supabase Storage
+      const baseFileName = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+      const webpPath = `content/${baseFileName}.webp`;
+      const jpegPath = `content/${baseFileName}.jpg`;
 
-      const { error: uploadError } = await supabase.storage
+      // Upload WebP
+      const { error: webpError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, optimizedImage);
+        .upload(webpPath, webp);
 
-      if (uploadError) throw uploadError;
+      if (webpError) throw webpError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Upload JPEG fallback
+      const { error: jpegError } = await supabase.storage
         .from('blog-images')
-        .getPublicUrl(filePath);
+        .upload(jpegPath, jpeg);
+
+      if (jpegError) throw jpegError;
+
+      // Get public URLs
+      const { data: { publicUrl: webpUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(webpPath);
+
+      const { data: { publicUrl: jpegUrl } } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(jpegPath);
 
       // Generate simple alt text from filename
       const simpleAlt = file.name.split('.')[0].replace(/[-_]/g, ' ');
       
       // Insert image markup (HTML or Markdown)
-      const imageMarkup = getImageMarkup(publicUrl, simpleAlt, '', '', 'center');
+      const imageMarkup = getImageMarkup(webpUrl, jpegUrl, simpleAlt, '', '', 'center');
       insertAtCursor(imageMarkup);
 
       toast({
