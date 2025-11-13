@@ -1,14 +1,17 @@
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface Props {
   title: string;
   content: string;
   featuredImage?: string;
   excerpt?: string;
+  isMarkdown?: boolean;
 }
 
-export const ContentPreview = ({ title, content, featuredImage, excerpt }: Props) => {
+export const ContentPreview = ({ title, content, featuredImage, excerpt, isMarkdown = false }: Props) => {
   return (
     <Card className="h-full border-l-0 rounded-l-none">
       <div className="border-b px-4 py-3 bg-muted/30">
@@ -42,8 +45,8 @@ export const ContentPreview = ({ title, content, featuredImage, excerpt }: Props
           )}
 
           {/* Content */}
-          <div
-            className="prose prose-slate dark:prose-invert max-w-none
+          {isMarkdown ? (
+            <div className="prose prose-slate dark:prose-invert max-w-none
               prose-headings:font-bold prose-headings:text-foreground
               prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
               prose-p:text-foreground prose-p:leading-relaxed
@@ -56,11 +59,32 @@ export const ContentPreview = ({ title, content, featuredImage, excerpt }: Props
               prose-li:text-foreground
               prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic
               prose-code:text-primary prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-              prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg
-              [&_iframe]:w-full [&_iframe]:rounded-lg [&_iframe]:shadow-md
-              [&_.video-container]:my-6"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+              prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {content}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <div
+              className="prose prose-slate dark:prose-invert max-w-none
+                prose-headings:font-bold prose-headings:text-foreground
+                prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                prose-p:text-foreground prose-p:leading-relaxed
+                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                prose-img:rounded-lg prose-img:shadow-md
+                prose-figure:my-6
+                prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-muted-foreground prose-figcaption:mt-2
+                prose-strong:text-foreground prose-strong:font-semibold
+                prose-ul:list-disc prose-ol:list-decimal
+                prose-li:text-foreground
+                prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic
+                prose-code:text-primary prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                prose-pre:bg-muted prose-pre:p-4 prose-pre:rounded-lg
+                [&_iframe]:w-full [&_iframe]:rounded-lg [&_iframe]:shadow-md
+                [&_.video-container]:my-6"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+          )}
 
           {/* Empty state */}
           {!content && !title && (

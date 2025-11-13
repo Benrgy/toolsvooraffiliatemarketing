@@ -53,6 +53,7 @@ export default function PostEditor() {
   const [content, setContent] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState<'draft' | 'published' | 'scheduled'>('draft');
+  const [editorMode, setEditorMode] = useState<'html' | 'markdown'>('html');
   const [publishedAt, setPublishedAt] = useState<Date | undefined>();
   const [featured, setFeatured] = useState(false);
   const [metaTitle, setMetaTitle] = useState('');
@@ -516,6 +517,8 @@ export default function PostEditor() {
                   <RichContentEditor
                     content={content}
                     onChange={setContent}
+                    mode={editorMode}
+                    onModeChange={setEditorMode}
                   />
 
                   <div className="space-y-2">
@@ -605,12 +608,13 @@ export default function PostEditor() {
               <ResizableHandle withHandle />
               
               <ResizablePanel defaultSize={50} minSize={30}>
-                <ContentPreview
-                  title={title}
-                  content={content}
-                  featuredImage={featuredImage}
-                  excerpt={excerpt}
-                />
+              <ContentPreview
+                title={title}
+                content={content}
+                featuredImage={featuredImage}
+                excerpt={excerpt}
+                isMarkdown={editorMode === 'markdown'}
+              />
               </ResizablePanel>
             </ResizablePanelGroup>
           </TabsContent>

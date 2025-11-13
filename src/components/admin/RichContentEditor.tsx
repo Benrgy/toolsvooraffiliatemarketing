@@ -5,16 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Image as ImageIcon, Video, Upload, Loader2, Link } from 'lucide-react';
+import { Image as ImageIcon, Video, Upload, Loader2, Link, FileCode, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 interface Props {
   content: string;
   onChange: (content: string) => void;
+  mode?: 'html' | 'markdown';
+  onModeChange?: (mode: 'html' | 'markdown') => void;
 }
 
-export const RichContentEditor = ({ content, onChange }: Props) => {
+export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -108,6 +110,45 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
     }, 0);
   };
 
+  const getImageMarkup = (url: string, alt: string, title: string, caption: string, position: string) => {
+    if (mode === 'markdown') {
+      let markup = `![${alt}](${url}${title ? ` "${title}"` : ''})`;
+      if (caption) {
+        markup += `\n*${caption}*`;
+      }
+      return markup;
+    } else {
+      // HTML mode
+      const alignClass = position === 'center' ? 'mx-auto' : position === 'right' ? 'ml-auto' : 'mr-auto';
+      let html = `<figure class="my-6 ${alignClass}">\n`;
+      html += `  <img src="${url}" alt="${alt}"${title ? ` title="${title}"` : ''} class="rounded-lg shadow-md w-full" loading="lazy" />\n`;
+      if (caption) {
+        html += `  <figcaption class="text-center text-sm text-muted-foreground mt-2">${caption}</figcaption>\n`;
+      }
+      html += `</figure>`;
+      return html;
+    }
+  };
+
+  const getVideoMarkup = (embedUrl: string, title: string, description: string) => {
+    if (mode === 'markdown') {
+      let markup = `[![${title || 'Video'}](${embedUrl.replace('/embed/', '/vi/').replace('player.vimeo.com/video/', 'i.vimeocdn.com/video/')}/0.jpg)](${embedUrl})`;
+      if (description) {
+        markup += `\n*${description}*`;
+      }
+      return markup;
+    } else {
+      // HTML mode
+      let html = `<div class="video-container my-6">\n`;
+      html += `  <iframe src="${embedUrl}" ${title ? `title="${title}"` : ''} frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full aspect-video rounded-lg shadow-md"></iframe>\n`;
+      if (description) {
+        html += `  <p class="text-center text-sm text-muted-foreground mt-2">${description}</p>\n`;
+      }
+      html += `</div>`;
+      return html;
+    }
+  };
+
   const handleImageUpload = async () => {
     if (!imageFile) {
       toast({
@@ -147,16 +188,9 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
         .from('blog-images')
         .getPublicUrl(filePath);
 
-      // Create HTML with SEO attributes
-      const alignClass = imagePosition === 'center' ? 'mx-auto' : imagePosition === 'left' ? 'float-left mr-4' : 'float-right ml-4';
-      const geoAttr = imageGeoTag ? ` data-geo="${imageGeoTag}"` : '';
-      
-      const imageHtml = `\n<figure class="${alignClass} my-4">
-  <img src="${publicUrl}" alt="${imageAlt}" title="${imageTitle || imageAlt}" class="rounded-lg max-w-full h-auto"${geoAttr} loading="lazy" />
-  ${imageCaption ? `<figcaption class="text-sm text-muted-foreground mt-2 text-center">${imageCaption}</figcaption>` : ''}
-</figure>\n\n`;
-
-      insertAtCursor(imageHtml);
+      // Insert image markup (HTML or Markdown)
+      const imageMarkup = getImageMarkup(publicUrl, imageAlt, imageTitle, imageCaption, imagePosition);
+      insertAtCursor(imageMarkup);
       
       // Reset form
       setShowImageDialog(false);
@@ -193,58 +227,33 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
       return;
     }
 
-    let embedCode = '';
+    // Parse video URL
+    let embedUrl = '';
     
-    // YouTube embed
-    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
-      let videoId = '';
-      if (videoUrl.includes('youtu.be/')) {
-        videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-      } else {
-        const urlParams = new URLSearchParams(new URL(videoUrl).search);
-        videoId = urlParams.get('v') || '';
-      }
-      
-      embedCode = `\n<div class="video-container my-6">
-  <iframe 
-    src="https://www.youtube.com/embed/${videoId}" 
-    title="${videoTitle || 'YouTube video'}"
-    ${videoDescription ? `aria-label="${videoDescription}"` : ''}
-    frameborder="0" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-    allowfullscreen
-    class="w-full aspect-video rounded-lg"
-    loading="lazy"
-  ></iframe>
-  ${videoDescription ? `<p class="text-sm text-muted-foreground mt-2">${videoDescription}</p>` : ''}
-</div>\n\n`;
+    // YouTube
+    const youtubeMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (youtubeMatch) {
+      embedUrl = `https://www.youtube.com/embed/${youtubeMatch[1]}`;
     }
-    // Vimeo embed
-    else if (videoUrl.includes('vimeo.com')) {
-      const videoId = videoUrl.split('vimeo.com/')[1].split('?')[0];
-      embedCode = `\n<div class="video-container my-6">
-  <iframe 
-    src="https://player.vimeo.com/video/${videoId}" 
-    title="${videoTitle || 'Vimeo video'}"
-    ${videoDescription ? `aria-label="${videoDescription}"` : ''}
-    frameborder="0" 
-    allow="autoplay; fullscreen; picture-in-picture" 
-    allowfullscreen
-    class="w-full aspect-video rounded-lg"
-    loading="lazy"
-  ></iframe>
-  ${videoDescription ? `<p class="text-sm text-muted-foreground mt-2">${videoDescription}</p>` : ''}
-</div>\n\n`;
-    } else {
+    
+    // Vimeo
+    const vimeoMatch = videoUrl.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+    }
+
+    if (!embedUrl) {
       toast({
-        title: 'Niet ondersteund',
-        description: 'Alleen YouTube en Vimeo URLs worden ondersteund.',
-        variant: 'destructive',
+        title: "Ongeldige URL",
+        description: "Voer een geldige YouTube of Vimeo URL in.",
+        variant: "destructive",
       });
       return;
     }
 
-    insertAtCursor(embedCode);
+    // Insert video markup (HTML or Markdown)
+    const videoMarkup = getVideoMarkup(embedUrl, videoTitle, videoDescription);
+    insertAtCursor(videoMarkup);
     setShowVideoDialog(false);
     setVideoUrl('');
     setVideoTitle('');
@@ -311,12 +320,9 @@ export const RichContentEditor = ({ content, onChange }: Props) => {
       // Generate simple alt text from filename
       const simpleAlt = file.name.split('.')[0].replace(/[-_]/g, ' ');
       
-      // Create HTML with basic SEO attributes
-      const imageHtml = `\n<figure class="mx-auto my-4">
-  <img src="${publicUrl}" alt="${simpleAlt}" class="rounded-lg max-w-full h-auto" loading="lazy" />
-</figure>\n\n`;
-
-      insertAtCursor(imageHtml);
+      // Insert image markup (HTML or Markdown)
+      const imageMarkup = getImageMarkup(publicUrl, simpleAlt, '', '', 'center');
+      insertAtCursor(imageMarkup);
 
       toast({
         title: 'Afbeelding toegevoegd',
