@@ -71,18 +71,21 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
         // Draw image on canvas
         ctx.drawImage(img, 0, 0, width, height);
 
-        // Convert to blob with compression
+        // Convert to WebP format for better compression
         canvas.toBlob(
           (blob) => {
             if (blob) {
-              console.log(`Image optimized: ${Math.round(file.size / 1024)}KB → ${Math.round(blob.size / 1024)}KB`);
+              const originalSizeKB = Math.round(file.size / 1024);
+              const optimizedSizeKB = Math.round(blob.size / 1024);
+              const compressionRatio = Math.round((1 - blob.size / file.size) * 100);
+              console.log(`Image optimized (WebP): ${originalSizeKB}KB → ${optimizedSizeKB}KB (${compressionRatio}% kleiner)`);
               resolve(blob);
             } else {
               reject(new Error('Failed to create blob'));
             }
           },
-          'image/jpeg',
-          0.85 // 85% quality
+          'image/webp',
+          0.90 // 90% quality for WebP provides excellent quality with better compression than JPEG
         );
       };
 
@@ -170,11 +173,11 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
 
     setUploading(true);
     try {
-      // Optimize image before upload
+      // Optimize image before upload (converts to WebP)
       const optimizedImage = await optimizeImage(imageFile);
       
       // Upload to Supabase Storage
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `content/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -299,11 +302,11 @@ export const RichContentEditor = ({ content, onChange, mode = 'html', onModeChan
     
     setUploading(true);
     try {
-      // Optimize image before upload
+      // Optimize image before upload (converts to WebP)
       const optimizedImage = await optimizeImage(file);
       
       // Upload to Supabase Storage
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
       const filePath = `content/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
