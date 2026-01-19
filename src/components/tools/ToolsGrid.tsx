@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ToolCard } from "./ToolCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+import { Package, Search } from "lucide-react";
 
 interface ToolsGridProps {
   searchQuery: string;
@@ -17,7 +19,7 @@ export const ToolsGrid = ({ searchQuery, selectedCategory, selectedPricing }: To
         .from("tools")
         .select(`
           *,
-          category:category_id(name, slug)
+          category:category_id(name, slug, icon)
         `)
         .eq("status", "published")
         .order("featured", { ascending: false })
@@ -56,10 +58,20 @@ export const ToolsGrid = ({ searchQuery, selectedCategory, selectedPricing }: To
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="space-y-4">
-                <Skeleton className="h-48 w-full rounded-lg" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-full" />
+              <div key={i} className="space-y-4 glass-card rounded-2xl p-6">
+                <div className="flex items-start justify-between">
+                  <Skeleton className="h-14 w-14 rounded-xl" />
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+                <div className="flex justify-between pt-2">
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-6 w-16" />
+                </div>
               </div>
             ))}
           </div>
@@ -70,14 +82,31 @@ export const ToolsGrid = ({ searchQuery, selectedCategory, selectedPricing }: To
 
   if (!tools || tools.length === 0) {
     return (
-      <section className="py-16 md:py-24">
+      <section className="py-24 md:py-32">
         <div className="container mx-auto px-4">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">Geen tools gevonden</h2>
-            <p className="text-muted-foreground">
-              Probeer een andere zoekopdracht of filter
-            </p>
-          </div>
+          <motion.div 
+            className="text-center space-y-6 max-w-md mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="mx-auto w-20 h-20 rounded-2xl glass-card flex items-center justify-center glow-primary">
+              {searchQuery ? (
+                <Search className="h-10 w-10 text-muted-foreground" />
+              ) : (
+                <Package className="h-10 w-10 text-muted-foreground" />
+              )}
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold">Geen tools gevonden</h2>
+              <p className="text-muted-foreground">
+                {searchQuery 
+                  ? `Geen resultaten voor "${searchQuery}". Probeer een andere zoekopdracht.`
+                  : "Er zijn momenteel geen tools die aan je criteria voldoen."
+                }
+              </p>
+            </div>
+          </motion.div>
         </div>
       </section>
     );
@@ -86,9 +115,22 @@ export const ToolsGrid = ({ searchQuery, selectedCategory, selectedPricing }: To
   return (
     <section className="py-16 md:py-24">
       <div className="container mx-auto px-4">
+        {/* Results count */}
+        <motion.div 
+          className="mb-8 flex items-center justify-between"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <p className="text-muted-foreground">
+            <span className="font-semibold text-foreground">{tools.length}</span> tools gevonden
+          </p>
+        </motion.div>
+        
+        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tools.map((tool) => (
-            <ToolCard key={tool.id} tool={tool} />
+          {tools.map((tool, index) => (
+            <ToolCard key={tool.id} tool={tool} index={index} />
           ))}
         </div>
       </div>
