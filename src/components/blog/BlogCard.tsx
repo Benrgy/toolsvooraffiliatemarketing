@@ -1,10 +1,10 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, ArrowUpRight, BookOpen } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { motion } from "framer-motion";
 
 interface BlogCardProps {
   post: {
@@ -22,68 +22,99 @@ interface BlogCardProps {
       avatar_url: string | null;
     } | null;
   };
+  index?: number;
 }
 
-export const BlogCard = ({ post }: BlogCardProps) => {
+export const BlogCard = ({ post, index = 0 }: BlogCardProps) => {
   const readingTime = post.content
     ? Math.ceil(post.content.split(" ").length / 200)
     : 5;
 
   return (
-    <Link to={`/blog/${post.slug}`} className="group">
-      <Card className="h-full overflow-hidden transition-smooth hover-scale shadow-card hover:shadow-card-hover">
-        {post.featured_image && (
-          <div className="aspect-video overflow-hidden">
-            <img
-              src={post.featured_image}
-              alt={post.featured_image_alt || post.title}
-              className="w-full h-full object-cover transition-smooth group-hover:scale-105"
-            />
-          </div>
-        )}
-
-        <CardHeader className="space-y-2">
-          <div className="flex items-center gap-2">
-            {post.category && <Badge variant="secondary">{post.category}</Badge>}
-          </div>
-          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-primary transition-smooth">
-            {post.title}
-          </h3>
-        </CardHeader>
-
-        <CardContent>
-          <p className="text-muted-foreground line-clamp-3">
-            {post.excerpt || "Lees meer om deze interessante blog te ontdekken..."}
-          </p>
-        </CardContent>
-
-        <CardFooter className="flex items-center justify-between border-t pt-4">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={post.display_author?.avatar_url || undefined} />
-              <AvatarFallback>
-                {post.display_author?.name?.[0]?.toUpperCase() || "A"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium">
-              {post.display_author?.name || "Anonymous"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-sm text-muted-foreground">
-            {post.published_at && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>{format(new Date(post.published_at), "d MMM yyyy", { locale: nl })}</span>
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+    >
+      <Link to={`/blog/${post.slug}`} className="group block h-full">
+        <div className="relative h-full glass-card rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-elevated glow-primary-hover border-glow">
+          {/* Image Container */}
+          <div className="relative aspect-video overflow-hidden">
+            {post.featured_image ? (
+              <img
+                src={post.featured_image}
+                alt={post.featured_image_alt || post.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20 flex items-center justify-center">
+                <BookOpen className="h-16 w-16 text-primary/40" />
               </div>
             )}
-            <div className="flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              <span>{readingTime} min</span>
+            
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-card/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            
+            {/* Category badge */}
+            {post.category && (
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-background/90 backdrop-blur-sm text-foreground border-none">
+                  {post.category}
+                </Badge>
+              </div>
+            )}
+            
+            {/* Reading time */}
+            <div className="absolute top-4 right-4">
+              <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-sm text-xs font-medium">
+                <Clock className="h-3 w-3" />
+                {readingTime} min
+              </div>
             </div>
           </div>
-        </CardFooter>
-      </Card>
-    </Link>
+          
+          {/* Content */}
+          <div className="p-6 space-y-4">
+            {/* Title */}
+            <h3 className="text-xl font-semibold line-clamp-2 group-hover:text-primary transition-colors duration-300 flex items-start gap-2">
+              <span className="flex-1">{post.title}</span>
+              <ArrowUpRight className="h-5 w-5 flex-shrink-0 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary" />
+            </h3>
+            
+            {/* Excerpt */}
+            <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed">
+              {post.excerpt || "Ontdek deze interessante blog over affiliate marketing strategieën..."}
+            </p>
+            
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+              {/* Author */}
+              <div className="flex items-center gap-3">
+                <Avatar className="h-9 w-9 ring-2 ring-primary/20">
+                  <AvatarImage src={post.display_author?.avatar_url || undefined} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-sm">
+                    {post.display_author?.name?.[0]?.toUpperCase() || "A"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">
+                    {post.display_author?.name || "Redactie"}
+                  </span>
+                  {post.published_at && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(post.published_at), "d MMM yyyy", { locale: nl })}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Bottom hover bar */}
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+        </div>
+      </Link>
+    </motion.div>
   );
 };
