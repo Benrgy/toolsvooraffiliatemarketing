@@ -79,19 +79,42 @@ export const BlogGrid = () => {
       <section className="py-24 md:py-32">
         <div className="container mx-auto px-4">
           <motion.div 
-            className="text-center space-y-6 max-w-md mx-auto"
+            className="text-center space-y-8 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className="mx-auto w-20 h-20 rounded-2xl glass-card flex items-center justify-center glow-primary">
-              <BookOpen className="h-10 w-10 text-muted-foreground" />
+            <div className="mx-auto w-24 h-24 rounded-3xl glass-card flex items-center justify-center glow-primary">
+              <BookOpen className="h-12 w-12 text-primary" />
             </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold">Nog geen artikelen</h2>
-              <p className="text-muted-foreground">
-                Er zijn nog geen gepubliceerde blogposts. Kom binnenkort terug voor waardevolle content!
+            <div className="space-y-4">
+              <h2 className="text-3xl font-bold">Binnenkort beschikbaar</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                We werken hard aan waardevolle content over affiliate marketing en AI tools. 
+                Kom snel terug voor praktische gidsen, tutorials en strategieën!
               </p>
+            </div>
+            
+            {/* Coming soon topics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
+              {[
+                { emoji: "🤖", title: "AI Tools Gidsen", desc: "Complete reviews en tutorials" },
+                { emoji: "📈", title: "Groeistrategieën", desc: "Bewezen methodes voor succes" },
+                { emoji: "💡", title: "Case Studies", desc: "Echte succesverhalen" },
+                { emoji: "🎯", title: "SEO Tips", desc: "Optimaliseer je affiliate sites" },
+              ].map((topic, i) => (
+                <motion.div
+                  key={topic.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: 0.2 + i * 0.1 }}
+                  className="glass-card rounded-xl p-4 text-left"
+                >
+                  <span className="text-2xl mb-2 block">{topic.emoji}</span>
+                  <h3 className="font-semibold text-sm">{topic.title}</h3>
+                  <p className="text-xs text-muted-foreground">{topic.desc}</p>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </div>
