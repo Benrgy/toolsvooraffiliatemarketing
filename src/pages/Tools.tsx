@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { ToolsHero } from "@/components/tools/ToolsHero";
-import { ToolsGrid } from "@/components/tools/ToolsGrid";
+import { ToolsGridWithCompare } from "@/components/tools/ToolsGridWithCompare";
 import { ToolsFilters } from "@/components/tools/ToolsFilters";
 import { Helmet } from "react-helmet-async";
 
@@ -66,7 +66,7 @@ const Tools = () => {
         selectedPricing={selectedPricing}
         onPricingChange={setSelectedPricing}
       />
-      <ToolsGrid 
+      <ToolsGridWithCompare 
         searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         selectedPricing={selectedPricing}
