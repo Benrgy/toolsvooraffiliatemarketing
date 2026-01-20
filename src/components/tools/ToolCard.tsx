@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Star, ArrowUpRight, Sparkles, Check } from "lucide-react";
 import { motion } from "framer-motion";
+import { useState } from "react";
 
 interface ToolCardProps {
   tool: any;
@@ -9,6 +10,8 @@ interface ToolCardProps {
 }
 
 export const ToolCard = ({ tool, index = 0 }: ToolCardProps) => {
+  const [logoError, setLogoError] = useState(false);
+  
   const pricingConfig = {
     free: { label: 'Gratis', className: 'bg-success/10 text-success border-success/30' },
     freemium: { label: 'Freemium', className: 'bg-primary/10 text-primary border-primary/30' },
@@ -19,6 +22,20 @@ export const ToolCard = ({ tool, index = 0 }: ToolCardProps) => {
   const pricing = pricingConfig[tool.pricing_model as keyof typeof pricingConfig] || { 
     label: tool.pricing_model, 
     className: '' 
+  };
+  
+  // Generate gradient colors based on tool name
+  const getGradientColors = (name: string) => {
+    const colors = [
+      'from-blue-500/20 to-cyan-500/10',
+      'from-purple-500/20 to-pink-500/10',
+      'from-green-500/20 to-emerald-500/10',
+      'from-orange-500/20 to-amber-500/10',
+      'from-red-500/20 to-rose-500/10',
+      'from-indigo-500/20 to-violet-500/10',
+    ];
+    const index = name.charCodeAt(0) % colors.length;
+    return colors[index];
   };
 
   return (
@@ -46,19 +63,20 @@ export const ToolCard = ({ tool, index = 0 }: ToolCardProps) => {
             {/* Logo & Category */}
             <div className="flex items-start justify-between">
               <div className="relative">
-                {tool.logo_url ? (
+              {tool.logo_url && !logoError ? (
                   <div className="relative">
                     <img 
                       src={tool.logo_url} 
                       alt={`${tool.name} logo`}
-                      className="h-14 w-14 rounded-xl object-cover shadow-card ring-2 ring-border/50"
+                      className="h-14 w-14 rounded-xl object-contain bg-white shadow-card ring-2 ring-border/50 p-1"
+                      onError={() => setLogoError(true)}
                     />
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-success border-2 border-background flex items-center justify-center">
                       <Check className="h-2.5 w-2.5 text-success-foreground" />
                     </div>
                   </div>
                 ) : (
-                  <div className="h-14 w-14 rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                  <div className={`h-14 w-14 rounded-xl border-2 border-primary/30 bg-gradient-to-br ${getGradientColors(tool.name)} flex items-center justify-center shadow-card`}>
                     <span className="text-2xl font-bold text-gradient">
                       {tool.name.charAt(0)}
                     </span>
